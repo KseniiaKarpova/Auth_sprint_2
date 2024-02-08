@@ -5,7 +5,7 @@
 ### 1 step
 create **.env** file based on **.env.example**<br>
 ```bash
-cp env.example .env
+cp env_example .env
 ```
 Edit .env file.
 ### 2 step
