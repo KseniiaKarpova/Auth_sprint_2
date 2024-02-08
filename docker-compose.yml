@@ -11,9 +11,9 @@ services:
     env_file:
       - .env
     volumes:
-      - static_volume:/app/staticfiles
+      - static_volume:/app/static
       - media_volume:/app/media
-      - ./DjangoAdmin:/src
+      - ./DjangoAdmin:/app/
     depends_on:
       cinema_postgres:
         condition: service_started

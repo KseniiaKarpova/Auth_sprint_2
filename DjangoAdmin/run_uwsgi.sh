@@ -10,4 +10,4 @@ python3 manage.py migrate movies --no-input
 #python manage.py compilemessages -l en -l ru
 python manage.py createsuperuser --noinput || true
 
-uwsgi --strict --ini /app/uwsgi.ini
+uwsgi --strict --ini uwsgi/uwsgi.ini

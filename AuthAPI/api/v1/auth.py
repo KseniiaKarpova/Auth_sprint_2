@@ -4,11 +4,9 @@ from redis.asyncio import Redis
 
 from db.redis import get_redis
 from schemas.auth import (
-    AuthSettingsSchema,
-    LoginResponseSchema,
-    UserCredentials,
-    UserUpdate,
-    UserLogin)
+    AuthSettingsSchema, LoginResponseSchema,
+    UserCredentials, UserUpdate,
+    UserLogin, UserData)
 from services.auth import get_auth_service, AuthService
 from core.handlers import get_jwt_handler, JwtHandler
 
@@ -57,7 +55,9 @@ async def logout(
     return {"detail": "User successfully logged out"}
 
 
-@router.post("/registration")
+@router.post(
+        "/registration",
+        response_model=UserData)
 async def registration(
         user_credentials: UserCredentials,
         service: AuthService = Depends(get_auth_service)):
