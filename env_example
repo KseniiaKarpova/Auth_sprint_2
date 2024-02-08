@@ -1,0 +1,77 @@
+    AUTH_SECRET_KEY=something123456fromNozir
+    AUTH_JWT_ALGORITHM=HS256
+    HASHER_ALGORITHM=pbkdf2_sha256
+    HASHER_ROUNDS=302122
+
+    DEBUG=True
+    SECRET_KEY=django-insecure-ndt+77vv6vvav%69w-xdz=dnybdooif#2xq2=3w0-!7p++vphz
+    ALLOWED_HOSTS=app
+    PG_ENGINE=django.db.backends.postgresql
+    DJANGO_SUPERUSER_USERNAME=admin
+    DJANGO_SUPERUSER_PASSWORD=123123
+    DJANGO_SUPERUSER_EMAIL=mail@mail.ru
+
+    FILE_API_HOST=file_api
+    FILE_API_PORT=7070
+    FILE_API_URL=/api/v1/
+
+    REDIS_HOST=cache
+    REDIS_PORT=6379
+    REDIS_DB=0
+
+    S3_USER=adminS3
+    S3_PASSWORD=adminS3pass
+
+    OBS_TYPE=postgresql+asyncpg
+
+    AUTH_POSTGRES_HOST=auth_postgres
+    AUTH_POSTGRES_PASSWORD=123qwe
+    AUTH_POSTGRES_USER=app
+    AUTH_POSTGRES_DB=auth_database
+    AUTH_POSTGRES_PORT=5432
+
+    CINEMA_API_PROJECT_NAME=CinemaAPI
+
+    CINEMA_POSTGRES_NAME=movies_database
+    CINEMA_POSTGRES_USER=app
+    CINEMA_POSTGRES_PASSWORD=123qwe
+    CINEMA_POSTGRES_HOST=cinema_postgres
+    CINEMA_POSTGRES_PORT=5432
+
+    FILE_POSTGRES_HOST=file_postgres
+    FILE_POSTGRES_PORT=5432
+    FILE_POSTGRES_USER=user
+    FILE_POSTGRES_PASSWORD=user123
+    FILE_POSTGRES_NAME=files
+
+    ES_PORT=9200
+    ES_HOST=elasticsearch
+    ES_INDEX=movies
+
+    REDIS_HOST=redis
+    REDIS_PORT=6379
+
+    AUTH_REDIS_DB=0
+    CINEMA_REDIS_DB=0
+    ETL_REDIS_DB=0
+    FILE_REDIS_DB=0
+
+    TEST_POSTGRES_HOST=test_postgres_db
+    TEST_POSTGRES_PASSWORD=123qwe
+    TEST_POSTGRES_USER=app
+    TEST_POSTGRES_DB=auth_db
+    TEST_POSTGRES_PORT=5432
+    TEST_REDIS_HOST=test_redis
+    TEST_REDIS_PORT=6379
+
+
+    TEST_ES_PORT=9200
+    TEST_ES_HOST=test_elasticsearch
+    TEST_ES_INDEX=movies
+    TEST_ES_ID_FIELD=_id
+    TEST_SERVICE_URL=http://test_async_api:7000
+    TEST_REDIS_HOST=test_cache
+    TEST_REDIS_PORT=6379
+
+    S3_USER=adminS3
+    S3_PASSWORD=adminS3pass
