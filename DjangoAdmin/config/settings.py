@@ -36,7 +36,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'movies.apps.MoviesConfig',
+    'users.apps.UsersConfig'
 ]
+
+AUTHENTICATION_BACKENDS = ['users.auth.CustomBackend']
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -86,3 +90,6 @@ FILE_API_HOST = os.environ.get('FILE_API_HOST')
 FILE_API_URL = os.environ.get('FILE_API_URL')
 FILE_API_PORT = int(os.environ.get('FILE_API_PORT'))
 DEFAULT_CHARSET = 'utf-8'
+AUTH_USER_MODEL = "users.User"
+AUTH_API_HOST=os.environ.get('AUTH_API_HOST')
+AUTH_API_PORT=os.environ.get('AUTH_API_PORT')

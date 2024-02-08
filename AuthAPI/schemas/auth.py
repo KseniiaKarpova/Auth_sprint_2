@@ -6,7 +6,7 @@ from core.hasher import DataHasher
 
 
 class UserCredentials(BaseModel):
-    login: str
+    login: str | None = Field(None, description="login")
     password: str
     email: str
 
@@ -15,6 +15,13 @@ class UserLogin(BaseModel):
     login: str
     password: str
     agent: str
+
+
+class UserData(BaseModel):
+    password: str
+    email: str
+    surname: str | None
+    name: str | None
 
 
 class AuthSettingsSchema(BaseModel):
