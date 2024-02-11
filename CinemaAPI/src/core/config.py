@@ -1,10 +1,9 @@
 from logging import config as logging_config
 
 from core.logger import LOGGING
-
 from fastapi import Query
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
@@ -26,6 +25,8 @@ class Settings(BaseSettings):
     es_host: str = Field('elasticsearch', env='ES_HOST')
     es_port: int = Field(9200, env='ES_PORT')
     redis_host: str = Field('redis', env='REDIS_HOST')
+    jaeger_host: str = Field('auth_jaeger', env='JAEGER_HOST')
+    jaeger_port: int = Field(6831, env='JAEGER_PORT')
 
 
 class FileAPISettings(BaseSettings):

@@ -75,3 +75,6 @@
 
     S3_USER=adminS3
     S3_PASSWORD=adminS3pass
+
+    JAEGER_HOST=auth_jaeger
+    JAEGER_PORT=6831

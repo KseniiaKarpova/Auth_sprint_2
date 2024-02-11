@@ -1,9 +1,8 @@
 from logging import config as logging_config
 
+from core.logger import LOGGING
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from core.logger import LOGGING
 
 load_dotenv()
 
@@ -39,6 +38,12 @@ class HasherSettings(BaseSettings):
     model_config: str = SettingsConfigDict(env_prefix='hasher_')
 
 
+class JaegerSettings(BaseSettings):
+    host: str = ...
+    port: int = ...
+    model_config: str = SettingsConfigDict(env_prefix='jaeger_')
+
+
 class APPSettings(BaseSettings):
     project_name: str = 'Auth API'
     db: PostgresDbSettings = PostgresDbSettings()
@@ -46,6 +51,7 @@ class APPSettings(BaseSettings):
     redis: RedisSettings = RedisSettings()
     auth: AuthSettings = AuthSettings()
     hasher: HasherSettings = HasherSettings()
+    jaeger: JaegerSettings = JaegerSettings()
 
 
 settings = APPSettings()
