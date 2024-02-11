@@ -1,15 +1,14 @@
 from functools import lru_cache
 from uuid import UUID
-from fastapi import Depends
 
 from core.hasher import DataHasher
-from services import BaseService
-from storages.user import UserStorage
-from schemas.auth import UserCredentials, UserUpdate
-from exceptions import user_created, user_updated
-from core.hasher import DataHasher
-from sqlalchemy.ext.asyncio import AsyncSession
 from db.postgres import create_async_session
+from exceptions import user_created, user_updated
+from fastapi import Depends
+from schemas.auth import UserCredentials, UserUpdate
+from services import BaseService
+from sqlalchemy.ext.asyncio import AsyncSession
+from storages.user import UserStorage
 
 
 class AuthService(BaseService):

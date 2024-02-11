@@ -1,7 +1,7 @@
-from django.core.files.storage import Storage
-from django.core.files.uploadedfile import InMemoryUploadedFile
 import requests
 from django.conf import settings
+from django.core.files.storage import Storage
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 class CustomStorage(Storage):

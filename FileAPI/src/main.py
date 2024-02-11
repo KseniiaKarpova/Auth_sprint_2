@@ -2,17 +2,15 @@ import logging
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI
-from fastapi.responses import ORJSONResponse
-from miniopy_async import Minio
-from sqlalchemy.ext.asyncio import create_async_engine
-
 from api.v1 import file
 from core import config
 from core.logger import LOGGING
 from db import minio, postgres
-from models.file_db import Base
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from fastapi import FastAPI
+from fastapi.responses import ORJSONResponse
+from miniopy_async import Minio
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 
 settings = config.Settings()
 

@@ -1,15 +1,11 @@
 from async_fastapi_jwt_auth import AuthJWT
-from fastapi import APIRouter, Depends, Header, Body
-from redis.asyncio import Redis
-
+from core.handlers import JwtHandler, get_jwt_handler
 from db.redis import get_redis
-from schemas.auth import (
-    AuthSettingsSchema, LoginResponseSchema,
-    UserCredentials, UserUpdate,
-    UserLogin, UserData)
-from services.auth import get_auth_service, AuthService
-from core.handlers import get_jwt_handler, JwtHandler
-
+from fastapi import APIRouter, Body, Depends, Header
+from redis.asyncio import Redis
+from schemas.auth import (AuthSettingsSchema, LoginResponseSchema,
+                          UserCredentials, UserData, UserLogin, UserUpdate)
+from services.auth import AuthService, get_auth_service
 
 router = APIRouter()
 

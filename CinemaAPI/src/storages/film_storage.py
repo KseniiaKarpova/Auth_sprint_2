@@ -1,8 +1,9 @@
 from abc import abstractmethod
+from uuid import UUID
+
+from db.elastic import get_elastic
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from storages.base_storage import BaseStorage
-from db.elastic import get_elastic
-from uuid import UUID
 
 
 class FilmBaseStorage(BaseStorage):

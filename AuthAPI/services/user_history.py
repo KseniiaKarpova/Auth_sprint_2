@@ -1,14 +1,14 @@
 from functools import lru_cache
-
-from fastapi import Depends
-from services import BaseService
-from storages.user_history import UserHistoryStorage
-from models.models import UserHistory
-from sqlalchemy.ext.asyncio import AsyncSession
-from db.postgres import create_async_session
 from uuid import UUID
-from schemas.user_history import UserHistoryCreate
+
 from core.params import QueryParams
+from db.postgres import create_async_session
+from fastapi import Depends
+from models.models import UserHistory
+from schemas.user_history import UserHistoryCreate
+from services import BaseService
+from sqlalchemy.ext.asyncio import AsyncSession
+from storages.user_history import UserHistoryStorage
 
 
 class UserHistoryService(BaseService):
@@ -21,7 +21,7 @@ class UserHistoryService(BaseService):
                 'user_id': user_id,
             },
         )
-    
+
     async def save_login(self, data: UserHistoryCreate):
         pass
 

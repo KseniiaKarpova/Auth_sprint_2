@@ -1,11 +1,10 @@
 from uuid import UUID
 
 from core.config import QueryParams, file_api_settings
+from exceptions import file_not_found, film_not_found, films_not_found
+from fastapi import APIRouter, Depends, Request
 from models.film import Film, FilmDetail
 from services.film import FilmService, get_film_service
-
-from fastapi import APIRouter, Depends, Request
-from exceptions import film_not_found, films_not_found, file_not_found
 
 router = APIRouter()
 

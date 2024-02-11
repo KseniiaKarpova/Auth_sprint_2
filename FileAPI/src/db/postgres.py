@@ -1,8 +1,8 @@
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from sqlalchemy import select
 from db import AbstractStorage
-from models.file_db import FileDbModel
 from exceptions import file_already_exist_error, file_not_found
+from models.file_db import FileDbModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 engine = None
 async_session = None
@@ -17,7 +17,7 @@ async def get_session() -> AsyncSession:
 
 class PostgresStorage(AbstractStorage):
     async def save(self, data, path):
-        object=FileDbModel(
+        object = FileDbModel(
                 path_in_storage=path,
                 filename=data.get('filename'),
                 size=data.get('size'),

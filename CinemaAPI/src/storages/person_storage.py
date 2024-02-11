@@ -1,8 +1,9 @@
-from elasticsearch import AsyncElasticsearch, NotFoundError
-from uuid import UUID
-from storages.base_storage import BaseStorage
-from db.elastic import get_elastic
 from abc import abstractmethod
+from uuid import UUID
+
+from db.elastic import get_elastic
+from elasticsearch import AsyncElasticsearch, NotFoundError
+from storages.base_storage import BaseStorage
 
 
 class PersonBaseStorage(BaseStorage):

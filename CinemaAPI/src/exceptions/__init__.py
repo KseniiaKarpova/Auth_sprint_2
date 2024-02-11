@@ -1,5 +1,6 @@
-from fastapi import HTTPException
 from http import HTTPStatus
+
+from fastapi import HTTPException
 
 genres_not_found = HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Genres Not Found")
 genre_not_found = HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Genre Not Found")

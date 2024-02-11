@@ -1,13 +1,8 @@
+from core.handlers import JwtHandler, get_jwt_handler
+from exceptions import crud_not_found, role_already_exist_error, role_not_found
 from fastapi import APIRouter, Depends, Query, status
-
-from exceptions import (
-    crud_not_found,
-    role_already_exist_error,
-    role_not_found)
 from models.models import Role
 from services.crud import CrudService, get_crud_service
-from core.handlers import JwtHandler, get_jwt_handler
-
 
 router = APIRouter()
 

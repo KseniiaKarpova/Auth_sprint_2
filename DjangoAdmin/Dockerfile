@@ -29,6 +29,5 @@ RUN  mkdir -p /var/www/static/ \
 
 COPY . /app
 ENV DJANGO_SETTINGS_MODULE 'config.settings'
-EXPOSE 8000
 
 ENTRYPOINT [ "sh", "/app/run_uwsgi.sh" ]

@@ -1,32 +1,33 @@
 import json
-from async_fastapi_jwt_auth import AuthJWT
-from fastapi import Depends, Body
-from schemas.auth import JWTUserData, LoginResponseSchema, UserLogin
+from functools import lru_cache
 from uuid import UUID
-from exceptions import incorrect_credentials, unauthorized, forbidden_error
+
+from async_fastapi_jwt_auth import AuthJWT
 from core.hasher import DataHasher
-from sqlalchemy.ext.asyncio import AsyncSession
 from db.postgres import create_async_session
+from exceptions import forbidden_error, incorrect_credentials, unauthorized
+from fastapi import Depends
+from models.models import User
+from schemas.auth import JWTUserData, LoginResponseSchema, UserLogin
+from sqlalchemy.ext.asyncio import AsyncSession
 from storages.user import UserStorage
 from storages.user_history import UserHistoryStorage
-from models.models import User
-from functools import lru_cache
 
 
 class JWTCoverter:
     async def get_data(self, payload: dict):
         return json.loads(payload)
-    
+
     async def convert_data(self, payload: dict):
         return json.dumps(payload)
 
 
 class JwtHandler:
     def __init__(self,
-                Authorize: AuthJWT,
-                jwt_converter: JWTCoverter,
-                storage: UserStorage,
-                observer: UserHistoryStorage,
+                 Authorize: AuthJWT,
+                 jwt_converter: JWTCoverter,
+                 storage: UserStorage,
+                 observer: UserHistoryStorage,
                  ) -> None:
         self.auth = Authorize
         self.jwt_converter = jwt_converter
@@ -78,8 +79,8 @@ class JwtHandler:
             'uuid': str(user.uuid)
         })
 
-        access_token=await self.generate_access_token(subject=subject)
-        refresh_token=await self.generate_refresh_token(subject=subject)
+        access_token = await self.generate_access_token(subject=subject)
+        refresh_token = await self.generate_refresh_token(subject=subject)
 
         if self.observer:
             await self.observer.create(

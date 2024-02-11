@@ -1,6 +1,5 @@
 import logging
 
-
 # Set up logging
 log_file = 'sqlite_to_postgres.log'
 max_file_size = 1024 * 1024  # 1 MB

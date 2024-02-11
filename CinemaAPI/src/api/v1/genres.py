@@ -1,10 +1,9 @@
 from uuid import UUID
 
+from exceptions import genre_not_found, genres_not_found
+from fastapi import APIRouter, Depends, Request
 from models.genre import Genre
 from services.genres import GenreService, get_genre_service
-
-from fastapi import APIRouter, Depends, Request
-from exceptions import genre_not_found, genres_not_found
 
 router = APIRouter()
 
