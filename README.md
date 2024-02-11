@@ -65,11 +65,11 @@ curl -X 'GET' \
 ```
 # Links
 
-1.[Django admin panel](http://127.0.0.1:80/admin/)  
-2.[Swagger для FastApi](http://127.0.0.1:8080/api/openapi)  
+1.[Django admin panel](http://127.0.0.1:8003/admin/)  
+2.[Swagger для CinemaApi](http://127.0.0.1:8002/api/openapi)  
 3.[Minio S3](http://localhost:9001)  
 4.[Swagger для FileApi](http://localhost:2080/api/openapi)  
-5.[Swagger для AuthAPI](http://localhost:9999/api/openapi)
+5.[Swagger для AuthAPI](http://localhost:8001/api/openapi)
 
 
 # Tests
@@ -80,4 +80,13 @@ docker-compose -f docker-compose-tests.yml up --build
 unit-тесты для сервиса FileAPI:
 ```bash
 docker exec file_api pytest /app/test.py
+```
+
+# Jaeger 
+
+**URL** : http://localhost:16686/search
+
+### Test:
+```commandline
+curl -H 'X-Request-Id: my-Request-Id_1' http://127.0.0.1:8002/api/v1/genres/
 ```
