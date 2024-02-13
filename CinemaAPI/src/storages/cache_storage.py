@@ -1,8 +1,9 @@
 import json
+from typing import Any
+
+from db.redis import get_redis
 from redis.asyncio import Redis
 from storages.base_storage import BaseCache
-from db.redis import get_redis
-from typing import Any
 
 
 class RedisCache(BaseCache):

@@ -1,5 +1,6 @@
 from fastapi import Query
 
+
 class QueryParams:
     def __init__(
         self,

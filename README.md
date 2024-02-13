@@ -1,11 +1,34 @@
-# Проектная работа 6 спринта
+# Проектная работа 7 спринта
+### [link to git](https://github.com/KseniiaKarpova/Auth_sprint_2)
 
-### [link to git](https://github.com/KseniiaKarpova/Async_API_sprint_3)
+## Техническое задание:
+1. Создайте интеграцию Auth-сервиса с сервисом выдачи контента и панелью администратора Django, используя контракт, который вы сделали в прошлом задании.
+  
+    При создании интеграции не забудьте учесть изящную деградацию Auth-сервиса. Как вы уже выяснили ранее, Auth сервис один из самых нагруженных, потому что в него ходят большинство сервисов сайта. И если он откажет, сайт отказать не должен. Обязательно учтите этот сценарий в интеграциях с Auth-сервисом.
+2. Добавьте в Auth трасировку и подключите к Jaeger. Для этого вам нужно добавить работу с заголовком x-request-id и отправку трасировок в Jaeger.
+3. Добавьте в сервис механизм ограничения количества запросов к серверу.
+4. Партицируйте таблицу с пользователями. 
+Подумайте, по каким критериям вы бы разделили её. Важно посмотреть на таблицу не только в текущем времени, но и заглядывая в некое будущее, когда в ней будут миллионы записей. Пользователи могут быть из одной страны, но из разных регионов. А ещё пользователи могут использовать разные устройства для входа и иметь разные возрастные ограничения.
+5. Упростите регистрацию и аутентификацию пользователей в Auth-сервисе, добавив вход через социальные сервисы. Список сервисов выбирайте исходя из целевой аудитории онлайн-кинотеатра — подумайте, какими социальными сервисами они пользуются. Например, использовать [OAuth от Github](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps) — не самая удачная идея. Ваши пользователи не разработчики и вряд ли имеют аккаунт на Github. А вот добавить VK, Google, Yandex или Mail будет хорошей идеей.
+
+    Вам не нужно делать фронтенд в этой задаче и реализовывать собственный сервер OAuth. Нужно реализовать протокол со стороны потребителя.
+    
+    Информация по OAuth у разных поставщиков данных: 
+    
+    - [Yandex](https://yandex.ru/dev/oauth/?turbo=true),
+    - [VK](https://vk.com/dev/access_token),
+    - [Google](https://developers.google.com/identity/protocols/oauth2),
+    - [Mail](https://api.mail.ru/docs/guides/oauth/).
+    
+**Дополнительное задание**
+Реализуйте возможность открепить аккаунт в соцсети от личного кабинета.
+
+
 # Запуск проекта
 ### 1 step
 create **.env** file based on **.env.example**<br>
 ```bash
-cp env.example .env
+cp env_example .env
 ```
 Edit .env file.
 ### 2 step
@@ -42,10 +65,11 @@ curl -X 'GET' \
 ```
 # Links
 
-1.[Django admin panel](http://127.0.0.1:80/admin/)  
-2.[Swagger для FastApi](http://127.0.0.1:8080/api/openapi)  
+1.[Django admin panel](http://127.0.0.1:8003/admin/)  
+2.[Swagger для CinemaApi](http://127.0.0.1:8002/api/openapi)  
 3.[Minio S3](http://localhost:9001)  
-4.[Swagger для  FileApi](http://localhost:2080/api/openapi)  
+4.[Swagger для FileApi](http://localhost:2080/api/openapi)  
+5.[Swagger для AuthAPI](http://localhost:8001/api/openapi)
 
 
 # Tests
@@ -57,3 +81,14 @@ unit-тесты для сервиса FileAPI:
 ```bash
 docker exec file_api pytest /app/test.py
 ```
+
+
+# Jaeger 
+
+**URL** : http://localhost:16686/search
+
+### Test:
+```commandline
+curl -H 'X-Request-Id: my-Request-Id_1' -H 'X-Forwarded-For: test' http://127.0.0.1:8002/api/v1/genres/
+```
+

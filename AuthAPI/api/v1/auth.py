@@ -1,7 +1,5 @@
 from async_fastapi_jwt_auth import AuthJWT
-from fastapi import APIRouter, Depends, Header, Body
-from redis.asyncio import Redis
-
+from core.handlers import JwtHandler, get_jwt_handler
 from db.redis import get_redis
 from schemas.auth import (
     AuthSettingsSchema, LoginResponseSchema,
