@@ -1,9 +1,9 @@
 import json
 from async_fastapi_jwt_auth import AuthJWT
-from fastapi import Depends, Body
-from schemas.auth import JWTUserData, LoginResponseSchema, UserLogin
+from fastapi import Depends
+from schemas.auth import JWTUserData, LoginResponseSchema, UserLogin, AuthSettingsSchema
 from uuid import UUID
-from exceptions import incorrect_credentials, unauthorized, forbidden_error
+from exceptions import incorrect_credentials, unauthorized, forbidden_error, server_error
 from core.hasher import DataHasher
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.postgres import create_async_session
@@ -11,27 +11,115 @@ from storages.user import UserStorage
 from storages.user_history import UserHistoryStorage
 from models.models import User
 from functools import lru_cache
+import http
+import time
+from typing import Optional
+from jose import jwt
+from fastapi import HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from core.config import settings
+from db.redis import get_redis
 
 
-class JWTCoverter:
-    async def get_data(self, payload: dict):
-        return json.loads(payload)
-    
-    async def convert_data(self, payload: dict):
-        return json.dumps(payload)
+@AuthJWT.load_config
+def get_auth_config():
+    return AuthSettingsSchema()
+
+
+def decode_token(token: str) -> Optional[dict]:
+    try:
+        decoded_token = jwt.decode(token, settings.auth.secret_key, algorithms=[settings.auth.jwt_algorithm])
+        if decoded_token['exp'] < time.time():
+            raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN, detail='Invalid or expired token.')
+        return decoded_token
+    except Exception:
+        raise server_error
+
+
+async def jwt_user_data(subject: dict):
+    subject: dict = json.loads(subject)
+    login, uuid = subject.get('login'), subject.get('uuid')
+    if not login or not uuid:
+        raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN, detail='Invalid authorization code.')
+    return JWTUserData(login=login, uuid=uuid)
+
+
+class JWTBearer(HTTPBearer):
+    def __init__(
+            self, auto_error: bool = True,
+            token_type: str = 'access'):
+        self.token_type = token_type
+        super().__init__(auto_error=auto_error)
+
+    async def __call__(self, request: Request) -> dict:
+        credentials: HTTPAuthorizationCredentials = await super().__call__(request)
+        await self.check_credentials(credentials=credentials)
+        decoded_token = decode_token(credentials.credentials)
+        subject, jti, type = await self.check_fields(decoded_token=decoded_token)
+        if type != self.token_type:
+            raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN, detail='wrong token')
+        return {
+            'subject': subject,
+            'jti': jti,
+            'type': type
+        }
+
+    async def check_denylist(self, jti):
+        redis = get_redis()
+        denied = await redis.get(jti)
+        if denied:
+            raise forbidden_error
+
+    async def check_credentials(self, credentials: HTTPAuthorizationCredentials):
+        if not credentials:
+            raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN, detail='Invalid authorization code.')
+        if not credentials.scheme == 'Bearer':
+            raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED, detail='Only Bearer token might be accepted')
+        
+    async def check_fields(self, decoded_token: dict):
+        subject: dict = decoded_token.get('sub')
+        jti = decoded_token.get('jti')
+        type = decoded_token.get('type')
+        if not subject or not jti or not type:
+            raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN, detail='Invalid or expired token.')
+        await self.check_denylist(jti=jti)
+        return subject, jti, type
 
 
 class JwtHandler:
-    def __init__(self,
-                Authorize: AuthJWT,
-                jwt_converter: JWTCoverter,
-                storage: UserStorage,
-                observer: UserHistoryStorage,
-                 ) -> None:
+    def __init__(self, session: AsyncSession,
+                 jwt_data: dict = None) -> None:
+
+        self.jwt_data = jwt_data
+        self.storage = UserStorage(session=session)
+
+    async def is_super_user(self):
+        user = await self.get_current_user()
+        exists = await self.storage.exists(conditions={
+            'uuid': user.uuid,
+            'is_superuser': True
+        })
+        if exists is False:
+            raise forbidden_error
+        return await jwt_user_data(subject=self.jwt_data.get('subject'))
+    
+    async def get_current_user(self) -> User:
+        return await jwt_user_data(subject=self.subject)
+
+    @property
+    def subject(self):
+        return self.jwt_data.get('subject')
+
+
+class AuthHandler:
+    def __init__(
+            self,
+            Authorize: AuthJWT,
+            session: AsyncSession) -> None:
         self.auth = Authorize
-        self.jwt_converter = jwt_converter
-        self.storage = storage
-        self.observer = observer
+        self.observer = UserHistoryStorage(session=session)
+        self.storage = UserStorage(session=session)
 
     async def generate_access_token(self, subject):
         return await self.auth.create_access_token(subject=subject, fresh=True)
@@ -39,43 +127,25 @@ class JwtHandler:
     async def generate_refresh_token(self, subject):
         return await self.auth.create_refresh_token(subject=subject)
 
-    async def get_current_user(self) -> JWTUserData:
-        """
-        Dependency to get the current user from the JWT token.
-        """
-        await self.auth.jwt_required()
-        jwt_subject = await self.auth.get_jwt_subject()
-        subject = await self.jwt_converter.get_data(payload=jwt_subject)
-        return JWTUserData(
-            login=subject['login'],
-            uuid=UUID(subject['uuid']),
-        )
-
-    async def is_super_user(self, current_user: JWTUserData = Depends(get_current_user)):
-        exists = await self.storage.exists(conditions={
-            'uuid': current_user.uuid,
-            'is_superuser': True
-        })
-        if exists is False:
-            raise forbidden_error
-        return current_user
-
+    async def refresh_access_token(self, subject: dict) -> LoginResponseSchema:
+        return LoginResponseSchema(
+            access_token=await self.generate_access_token(subject=subject))
+    
     async def check_credentials(self, credentials: UserLogin) -> User:
-        user = await self.storage.get(conditions={
-                'login': credentials.login
-            })
+        user, roles = await self.storage.with_roles(login=credentials.login)
         if not user:
             raise incorrect_credentials
         is_valid = await DataHasher().verify(secret_word=credentials.password, hashed_word=user.password)
         if is_valid is False:
             raise unauthorized
-        return user
+        return user, roles
 
     async def user_tokens(self, credentials: UserLogin) -> LoginResponseSchema:
-        user = await self.check_credentials(credentials)
-        subject = await self.jwt_converter.convert_data({
+        user, roles = await self.check_credentials(credentials)
+        subject = json.dumps({
             'login': user.login,
-            'uuid': str(user.uuid)
+            'uuid': str(user.uuid),
+            'roles': roles
         })
 
         access_token=await self.generate_access_token(subject=subject)
@@ -94,21 +164,23 @@ class JwtHandler:
             refresh_token=refresh_token,
         )
 
-    async def refresh_access_token(self) -> LoginResponseSchema:
-        await self.auth.jwt_refresh_token_required()
-        jwt_subject = await self.auth.get_jwt_subject()
-        return LoginResponseSchema(
-            access_token=await self.generate_access_token(subject=jwt_subject))
 
-
-@lru_cache()
-def get_jwt_handler(
-    Authorize=Depends(AuthJWT),
+def get_auth_handler(
+    auth: AuthJWT = Depends(),
     session: AsyncSession = Depends(create_async_session),
-    jwt_converter=Depends(JWTCoverter),
+) -> AuthHandler:
+    return AuthHandler(session=session, Authorize=auth)
+
+
+def require_access_token(
+    jwt_data: dict = Depends(JWTBearer(token_type='access')),
+    session: AsyncSession = Depends(create_async_session),
 ) -> JwtHandler:
-    return JwtHandler(
-        Authorize=Authorize,
-        jwt_converter=jwt_converter,
-        storage=UserStorage(session=session),
-        observer=UserHistoryStorage(session=session))
+    return JwtHandler(jwt_data=jwt_data, session=session)
+
+
+def require_refresh_token(
+    jwt_data: dict = Depends(JWTBearer(token_type='refresh')),
+    session: AsyncSession = Depends(create_async_session),
+) -> JwtHandler:
+    return JwtHandler(jwt_data=jwt_data, session=session)
