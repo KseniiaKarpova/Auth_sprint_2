@@ -6,20 +6,21 @@ from models.models import Base
 from exceptions import order_by_field_not_found
 from sqlalchemy.exc import IntegrityError
 from exceptions import integrity_error
-
+from db.postgres import commit_async_session
 
 class AlchemyBaseStorage(ABC):
     table: Base = None
 
     def __init__(
             self, session: AsyncSession = None,
-            limit: int = 10,
-            offset: int = 1,
-            order_by: list[str] = ['-created_at']) -> None:
+            limit: int = 10, offset: int = 1,
+            order_by: list[str] = ['-created_at'],
+            commit_mode: bool = True) -> None:
         self.session = session
         self.limit = limit
         self.offset = offset
         self.order_by = order_by
+        self.commit_mode = commit_mode
 
     async def desc_or_asc(self, field_name: str):
         try:
@@ -71,67 +72,71 @@ class AlchemyBaseStorage(ABC):
         return select(attributes).where(where_condition)
 
     async def exists(self, conditions: dict, attributes: dict = None) -> table:
-        async with self.session:
-            query = await self.generate_query(attributes=attributes, conditions=conditions)
-            instance = (await self.session.execute(query)).scalar()
+        query = await self.generate_query(attributes=attributes, conditions=conditions)
+        instance = (await self.execute(query)).scalar()
         return bool(instance)
 
     async def get(self, conditions: dict, attributes: dict = None) -> table:
         """
         SELECT from self.table by specified attributes. Return one objects
         """
-        async with self.session:
-            query = await self.generate_query(attributes=attributes, conditions=conditions)
-            instance = (await self.session.execute(query)).scalar()
+        query = await self.generate_query(attributes=attributes, conditions=conditions)
+        instance = (await self.execute(query)).scalar()
         return instance
     
-    async def get_many(self, conditions: dict, attributes: dict = None, ) -> list[table]:
+    async def get_many(self, conditions: dict, attributes: dict = None) -> list[table]:
         """
         SELECT from self.table by specified attributes. Return many objects
         """
-        async with self.session:
-            setattr(self, 'query', await self.generate_query(attributes=attributes, conditions=conditions))
-            await self.order()
-            query: Query = getattr(self, 'query', None)
-            instance = (await self.session.execute(query)).scalars().all()
+        setattr(self, 'query', await self.generate_query(attributes=attributes, conditions=conditions))
+        await self.order()
+        query: Query = getattr(self, 'query', None)
+        instance = (await self.execute(query)).scalars().all()
         return instance
 
     async def create(self, params: dict) -> table:
         """
         INSERT record
         """
-        async with self.session:
-            instance = self.table(**params)
-            self.session.add(instance)
-            try:
-                await self.session.commit()
-            except IntegrityError:
-                raise integrity_error
+        instance = self.table(**params)
+        self.session.add(instance)
+        await commit_async_session(session=self.session)
         return instance
 
     async def delete(self, conditions: dict):
         """
         DO NOT DELETE, MAKE is_active = False
         """
-        async with self.session:
-            where_condition = await self.generate_where(conditions=conditions)
-            query = update(self.table).where(where_condition).values({
-                'is_active': False
-            })
-            instance = await self.session.execute(query)
-            await self.session.commit()
+        where_condition = await self.generate_where(conditions=conditions)
+        query = update(self.table).where(where_condition).values({
+            'is_active': False
+        })
+        instance = await self.execute_and_commit(query=query)
         return instance
 
     async def update(self, conditions: dict, values: dict):
         """
         UPDATE values.keys() SET values FROM self.table WHERE conditions
         """
+        where_condition = await self.generate_where(conditions=conditions)
+        query = update(self.table).where(where_condition).values(values)
+        instance = await self.execute_and_commit(query=query)
+        return instance
+
+    async def execute(self, query: Query):
         async with self.session:
-            where_condition = await self.generate_where(conditions=conditions)
-            query = update(self.table).where(where_condition).values(values)
             try:
                 instance = await self.session.execute(query)
-                await self.session.commit()
             except IntegrityError:
                 raise integrity_error
+        return instance
+
+    async def execute_and_commit(self, query: Query):
+        async with self.session:
+            try:
+                instance = await self.session.execute(query)
+            except IntegrityError:
+                raise integrity_error
+            if self.commit_mode is True:
+                await commit_async_session(session=self.session)
         return instance

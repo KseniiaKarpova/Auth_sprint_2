@@ -6,7 +6,7 @@ from exceptions import (
     role_not_found)
 from models.models import Role
 from services.crud import CrudService, get_crud_service
-from core.handlers import JwtHandler, get_jwt_handler
+from core.handlers import JwtHandler, require_access_token
 
 
 router = APIRouter()
@@ -19,12 +19,13 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def create_role(
+    jwt_handler: JwtHandler = Depends(require_access_token),
     service: CrudService = Depends(get_crud_service),
     name: str | None = None,
 ):
+    user = await jwt_handler.get_current_user()
+    print(user.uuid, 'user_id')
     result = await service.create_role(name)
-    if result is None:
-        raise role_already_exist_error
     return result
 
 
@@ -35,7 +36,7 @@ async def create_role(
     status_code=status.HTTP_200_OK
 )
 async def delete_role(
-    jwt_handler: JwtHandler = Depends(get_jwt_handler),
+    jwt_handler: JwtHandler = Depends(require_access_token),
     service: CrudService = Depends(get_crud_service),
     type: str = Query(Role.get_colums()[0], enum=Role.get_colums()),
     value: str | None = None,
@@ -57,13 +58,13 @@ async def delete_role(
     status_code=status.HTTP_200_OK
 )
 async def set_role(
-    jwt_handler: JwtHandler = Depends(get_jwt_handler),
+    jwt_handler: JwtHandler = Depends(require_access_token),
     service: CrudService = Depends(get_crud_service),
     old: dict | None = None,
     new: dict | None = None,
 ):
-    await jwt_handler.is_super_user()
-
+    user = await jwt_handler.is_super_user()
+    print(user.uuid, 'user_id')
     result = await service.set_role(old, new)
     if not result:
         raise role_not_found
@@ -77,7 +78,7 @@ async def set_role(
     summary="",
 )
 async def show_role(
-    jwt_handler: JwtHandler = Depends(get_jwt_handler),
+    jwt_handler: JwtHandler = Depends(require_access_token),
     service: CrudService = Depends(get_crud_service),
 ):
     await jwt_handler.is_super_user()
@@ -94,7 +95,7 @@ async def show_role(
     summary="",
 )
 async def add_role(
-    jwt_handler: JwtHandler = Depends(get_jwt_handler),
+    jwt_handler: JwtHandler = Depends(require_access_token),
     service: CrudService = Depends(get_crud_service),
     user_id: str | None = None,
     role_id: str | None = None,
@@ -114,7 +115,7 @@ async def add_role(
     status_code=status.HTTP_200_OK
 )
 async def deprive_role(
-    jwt_handler: JwtHandler = Depends(get_jwt_handler),
+    jwt_handler: JwtHandler = Depends(require_access_token),
     service: CrudService = Depends(get_crud_service),
     user_id: str | None = None,
     role_id: str | None = None,
@@ -134,7 +135,7 @@ async def deprive_role(
     summary="",
 )
 async def check_role(
-    jwt_handler: JwtHandler = Depends(get_jwt_handler),
+    jwt_handler: JwtHandler = Depends(require_access_token),
     service: CrudService = Depends(get_crud_service),
     user_id: str | None = None,
     role_id: str | None = None,

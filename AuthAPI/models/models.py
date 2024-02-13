@@ -30,7 +30,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=True)
     surname: Mapped[str] = mapped_column(String(255), nullable=True)
     is_superuser: Mapped[bool] = mapped_column(default=False)
-    user_role: Mapped['UserRole'] = relationship(back_populates='user',
+    user_roles: Mapped[list['UserRole']] = relationship(back_populates='user',
                                                  cascade='all, delete',
                                                  passive_deletes=True)
     user_history: Mapped[List['UserHistory']] = relationship(back_populates='user',
@@ -45,7 +45,7 @@ class Role(Base):
                                        default=uuid.uuid4,
                                        primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
-    user_roles: Mapped['UserRole'] = relationship(back_populates="role",
+    user_roles: Mapped[list['UserRole']] = relationship(back_populates="role",
                                                   cascade="all, delete",
                                                   passive_deletes=True, )
 
@@ -66,7 +66,7 @@ class UserRole(Base):
     role_id: Mapped[UUID] = mapped_column(ForeignKey('roles.uuid'),
                                           onupdate='CASCADE',
                                           nullable=False)
-    user: Mapped['User'] = relationship(back_populates='user_role')
+    user: Mapped['User'] = relationship(back_populates='user_roles')
     role: Mapped['Role'] = relationship(back_populates='user_roles')
 
 
