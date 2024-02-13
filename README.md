@@ -82,6 +82,7 @@ unit-тесты для сервиса FileAPI:
 docker exec file_api pytest /app/test.py
 ```
 
+
 # Jaeger 
 
 **URL** : http://localhost:16686/search
@@ -90,3 +91,4 @@ docker exec file_api pytest /app/test.py
 ```commandline
 curl -H 'X-Request-Id: my-Request-Id_1' -H 'X-Forwarded-For: test' http://127.0.0.1:8002/api/v1/genres/
 ```
+

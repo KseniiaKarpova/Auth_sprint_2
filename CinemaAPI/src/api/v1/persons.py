@@ -6,6 +6,10 @@ from fastapi import APIRouter, Depends, Request
 from models.film import Film
 from models.person import Person, PersonDetails
 from services.person import PersonService, get_person_service
+from exceptions import person_not_found, films_not_found, persons_not_found
+from fastapi import APIRouter, Depends, Request
+from core.handlers import require_access_token, JwtHandler
+
 
 router = APIRouter()
 
@@ -18,10 +22,11 @@ router = APIRouter()
     summary="List of person",
 )
 async def search_person(
-    request: Request,
-    service: PersonService = Depends(get_person_service),
-    query: str = "",
-    commons: QueryParams = Depends(QueryParams),
+        request: Request,
+        service: PersonService = Depends(get_person_service),
+        query: str = "",
+        commons: QueryParams = Depends(QueryParams),
+        jwt_handler: JwtHandler = Depends(require_access_token)
 ) -> list[dict[str, Person]]:
     persons = await service.search_data(url=str(request.url),
                                         query=query,
@@ -42,7 +47,8 @@ async def search_person(
 async def get_person_by_id(
         request: Request,
         uuid: UUID,
-        service: PersonService = Depends(get_person_service)
+        service: PersonService = Depends(get_person_service),
+        jwt_handler: JwtHandler = Depends(require_access_token)
 ) -> Person:
     person = await service.get_data_by_id(url=str(request.url), id=str(uuid))
     if not person:
@@ -58,9 +64,10 @@ async def get_person_by_id(
     description="Getting person by uuid",
 )
 async def get_films_by_person(
-    request: Request,
-    uuid: UUID,
-    service: PersonService = Depends(get_person_service)
+        request: Request,
+        uuid: UUID,
+        service: PersonService = Depends(get_person_service),
+        jwt_handler: JwtHandler = Depends(require_access_token)
 ) -> list[dict[str, Film]]:
     films = await service.get_person_films(url=str(request.url), id=str(uuid))
     if not films:

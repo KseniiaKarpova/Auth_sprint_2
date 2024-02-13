@@ -1,10 +1,13 @@
 from uuid import UUID
 
-from core.config import QueryParams, file_api_settings
-from exceptions import file_not_found, film_not_found, films_not_found
-from fastapi import APIRouter, Depends, Request
+from core.config import QueryParams, settings
 from models.film import Film, FilmDetail
 from services.film import FilmService, get_film_service
+
+from fastapi import APIRouter, Depends, Request
+from exceptions import film_not_found, films_not_found, file_not_found
+from core.handlers import require_access_token, JwtHandler
+
 
 router = APIRouter()
 
@@ -23,6 +26,7 @@ async def get_film_list(
         sort: str = "-imdb_rating",
         genre: str = None,
         commons: QueryParams = Depends(QueryParams),
+        jwt_handler: JwtHandler = Depends(require_access_token)
 ) -> list[Film]:
     films = await film_service.get_data_list(sort, genre, commons.page_number, commons.page_size)
     if not films:
@@ -39,9 +43,10 @@ async def get_film_list(
     summary="List of films",
 )
 async def search_films(
-    film_service: FilmService = Depends(get_film_service),
-    query: str = "",
-    commons: QueryParams = Depends(QueryParams),
+        film_service: FilmService = Depends(get_film_service),
+        query: str = "",
+        commons: QueryParams = Depends(QueryParams),
+        jwt_handler: JwtHandler = Depends(require_access_token)
 ) -> list[dict[str, Film]]:
     films = await film_service.search_data(query, commons.page_number, commons.page_size)
     if not films:
@@ -58,7 +63,10 @@ async def search_films(
     description="Getting film by id",
 )
 async def get_film_details(
-    request: Request, film_id: UUID, film_service: FilmService = Depends(get_film_service)
+        request: Request,
+        film_id: UUID,
+        film_service: FilmService = Depends(get_film_service),
+        jwt_handler: JwtHandler = Depends(require_access_token)
 ) -> FilmDetail:
     film = await film_service.get_data_by_id(url=str(request.url), id=str(film_id))
     if not film:
@@ -74,7 +82,10 @@ async def get_film_details(
     description="Getting file film by id",
 )
 async def download_film(
-    request: Request, film_id: UUID, film_service: FilmService = Depends(get_film_service)
+        request: Request,
+        film_id: UUID,
+        film_service: FilmService = Depends(get_film_service),
+        jwt_handler: JwtHandler = Depends(require_access_token),
 ):
     film = await film_service.get_data_by_id(url=str(request.url), id=str(film_id))
     if not film:
@@ -83,5 +94,5 @@ async def download_film(
     if not file_name:
         raise file_not_found
     return {
-        "url": f'{file_api_settings.file_api_url}/download-stream/{file_name}/'
+        "url": f'{settings.file_api.full_path}/download-stream/{file_name}/'
     }

@@ -32,7 +32,6 @@ class AuthService(BaseService):
         return status
 
     async def update_user(self, user_id: UUID, data: UserUpdate):
-        print(data.dict(exclude_unset=True))
         await self.storage.update(
             conditions={
                 "uuid": user_id,
