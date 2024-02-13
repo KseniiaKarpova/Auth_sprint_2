@@ -14,7 +14,6 @@ class BaseStorage(ABC):
 
 
 class BaseCache(ABC):
-
     @abstractmethod
     async def get_from_cache(self, url: str):
         pass

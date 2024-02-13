@@ -5,6 +5,8 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (BatchSpanProcessor,
                                             ConsoleSpanExporter)
 
+tracer = trace.get_tracer(__name__)
+
 
 def configure_tracer(host, port, service_name) -> None:
     resource = Resource(attributes={

@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from api.v1 import films, genres, persons
 from core import config
-from core.jaeger import configure_tracer
+from utils.jaeger import configure_tracer
 from core.logger import LOGGING
 from db import elastic, redis
 from elasticsearch import AsyncElasticsearch
@@ -12,6 +12,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import ORJSONResponse
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
+from utils.constraint import RequestLimit
 
 settings = config.Settings()
 
@@ -39,6 +40,14 @@ app = FastAPI(
 
 @app.middleware('http')
 async def before_request(request: Request, call_next):
+    user_id = request.headers.get('X-Forwarded-For')
+    result = await RequestLimit().check_limit(user_id)
+    if result:
+        return ORJSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={'detail': 'Too many requests'}
+        )
+
     response = await call_next(request)
     request_id = request.headers.get('X-Request-Id')
     if not request_id:

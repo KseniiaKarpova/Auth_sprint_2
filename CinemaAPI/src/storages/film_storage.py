@@ -4,6 +4,7 @@ from uuid import UUID
 from db.elastic import get_elastic
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from storages.base_storage import BaseStorage
+from utils.jaeger import tracer
 
 
 class FilmBaseStorage(BaseStorage):
@@ -26,23 +27,25 @@ class FilmElasticStorage(FilmBaseStorage):
 
     async def search_data(self, query, page_number, page_size):
         search_query = {"query_string": {"default_field": "title", "query": query}}
-        docs = await self.elastic.search(
-            index="movies",
-            body={
-                "_source": ["id", "title", "imdb_rating"],
-                "from": (page_number - 1) * page_size,
-                "size": page_size,
-                "query": search_query,
-            },
-            params={"filter_path": "hits.hits._source"},
-        )
+        with tracer.start_as_current_span('elasticsearch-request'):
+            docs = await self.elastic.search(
+                index="movies",
+                body={
+                    "_source": ["id", "title", "imdb_rating"],
+                    "from": (page_number - 1) * page_size,
+                    "size": page_size,
+                    "query": search_query,
+                },
+                params={"filter_path": "hits.hits._source"},
+            )
         if not docs:
             return None
         return [film["_source"] for film in docs["hits"]["hits"]]
 
     async def get_data_by_id(self, id: UUID) -> dict | None:
         try:
-            doc = await self.elastic.get(index="movies", id=id)
+            with tracer.start_as_current_span('elasticsearch-request'):
+                doc = await self.elastic.get(index="movies", id=id)
         except NotFoundError:
             return None
         return doc["_source"]
@@ -61,17 +64,18 @@ class FilmElasticStorage(FilmBaseStorage):
                     "operator": "and",
                     "fuzziness": "AUTO"
                     }}}
-        docs = await self.elastic.search(
-            index="movies",
-            body={
-                "_source": ["id", "title", "imdb_rating"],
-                "sort": sort,
-                "from": (page_number - 1) * page_size,
-                "size": page_size,
-                "query": filter_query,
-            },
-            params={"filter_path": "hits.hits._source"},
-        )
+        with tracer.start_as_current_span('elasticsearch-request'):
+            docs = await self.elastic.search(
+                index="movies",
+                body={
+                    "_source": ["id", "title", "imdb_rating"],
+                    "sort": sort,
+                    "from": (page_number - 1) * page_size,
+                    "size": page_size,
+                    "query": filter_query,
+                },
+                params={"filter_path": "hits.hits._source"},
+            )
         if not docs:
             return None
         return [film["_source"] for film in docs["hits"]["hits"]]
