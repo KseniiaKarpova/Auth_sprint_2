@@ -1,11 +1,13 @@
 from abc import ABC
-
-from exceptions import integrity_error, order_by_field_not_found
+from sqlalchemy import and_, select, update, desc, asc
+from sqlalchemy.orm import Query
+from sqlalchemy.ext.asyncio import AsyncSession
 from models.models import Base
-from sqlalchemy import and_, asc, desc, select, update
+from exceptions import order_by_field_not_found
 from sqlalchemy.exc import IntegrityError
 from exceptions import integrity_error
 from db.postgres import commit_async_session
+from utils.jaeger import tracer
 
 
 class AlchemyBaseStorage(ABC):
@@ -127,7 +129,8 @@ class AlchemyBaseStorage(ABC):
     async def execute(self, query: Query):
         async with self.session:
             try:
-                instance = await self.session.execute(query)
+                with tracer.start_as_current_span('storage-request'):
+                    instance = await self.session.execute(query)
             except IntegrityError:
                 raise integrity_error
         return instance
@@ -135,7 +138,8 @@ class AlchemyBaseStorage(ABC):
     async def execute_and_commit(self, query: Query):
         async with self.session:
             try:
-                instance = await self.session.execute(query)
+                with tracer.start_as_current_span('storage-request'):
+                    instance = await self.session.execute(query)
             except IntegrityError:
                 raise integrity_error
             if self.commit_mode is True:

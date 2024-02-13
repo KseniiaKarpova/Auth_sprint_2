@@ -40,8 +40,8 @@ app = FastAPI(
 
 @app.middleware('http')
 async def before_request(request: Request, call_next):
-    user_id = request.headers.get('X-Forwarded-For')
-    result = await RequestLimit().check_limit(user_id)
+    user = request.headers.get('X-Forwarded-For')
+    result = await RequestLimit().is_over_limit(user=user)
     if result:
         return ORJSONResponse(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,

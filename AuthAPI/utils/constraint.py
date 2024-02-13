@@ -4,7 +4,7 @@ from datetime import datetime
 
 class RequestLimit:
     DURATION = 60 # 1min
-    LIMIT = 100
+    LIMIT =200
 
     def __init__(self, duration: int = None, limit: int = None):
         self.pipeline = get_redis().pipeline(transaction=True)
