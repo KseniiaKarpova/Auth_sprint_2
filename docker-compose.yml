@@ -233,7 +233,7 @@ services:
       - ./Nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./Nginx/auth_api.conf:/etc/nginx/conf.d/auth_api.conf:ro
       - ./Nginx/file_api.conf:/etc/nginx/conf.d/file_api.conf:ro
-      #- ./Nginx/django_admin.conf:/etc/nginx/conf.d/django_admin.conf:ro
+      - ./Nginx/django_admin.conf:/etc/nginx/conf.d/django_admin.conf:ro
       - ./Nginx/cinema_api.conf:/etc/nginx/conf.d/cinema_api.conf:ro
       - static_volume:/app/staticfiles
       - media_volume:/app/media
