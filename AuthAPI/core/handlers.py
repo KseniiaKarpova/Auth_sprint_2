@@ -2,15 +2,10 @@ import json
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi import Depends
 from schemas.auth import JWTUserData, LoginResponseSchema, UserLogin, AuthSettingsSchema
-from uuid import UUID
 from exceptions import incorrect_credentials, unauthorized, forbidden_error, server_error
 from core.hasher import DataHasher
-from db.postgres import create_async_session
-from exceptions import forbidden_error, incorrect_credentials, unauthorized
-from fastapi import Depends
-from models.models import User
-from schemas.auth import JWTUserData, LoginResponseSchema, UserLogin
 from sqlalchemy.ext.asyncio import AsyncSession
+from db.postgres import create_async_session
 from storages.user import UserStorage
 from storages.user_history import UserHistoryStorage
 from models.models import User
@@ -152,8 +147,8 @@ class AuthHandler:
             'roles': roles
         })
 
-        access_token = await self.generate_access_token(subject=subject)
-        refresh_token = await self.generate_refresh_token(subject=subject)
+        access_token=await self.generate_access_token(subject=subject)
+        refresh_token=await self.generate_refresh_token(subject=subject)
 
         if self.observer:
             await self.observer.create(

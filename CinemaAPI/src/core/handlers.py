@@ -79,6 +79,10 @@ class JwtHandler:
     async def get_current_user(self):
         return await jwt_user_data(subject=self.subject)
 
+    @property
+    def subject(self):
+        return self.jwt_data.get('subject')
+
 
 def require_access_token(
     jwt_data: dict = Depends(JWTBearer(token_type='access'))

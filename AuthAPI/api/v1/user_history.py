@@ -1,11 +1,11 @@
-from core.handlers import JwtHandler, get_jwt_handler
 from fastapi import APIRouter, Depends
+from services.user_history import get_user_history_service, UserHistoryService
+from core.handlers import JwtHandler
 from schemas.user_history import UserHistory
 from core.handlers import JwtHandler, require_access_token
 
 
 router = APIRouter()
-
 
 @router.get("", response_model=list[UserHistory])
 async def login_history(

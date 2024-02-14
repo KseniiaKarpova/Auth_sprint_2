@@ -9,14 +9,17 @@ services:
       context: DjangoAdmin
       dockerfile: Dockerfile
     container_name: django_admin
+    command: gunicorn config.asgi:application --config config/gunicorn_config.py
+    environment:
+      PYTHONPATH: /app
     expose:
       - 8003
     env_file:
       - .env
     volumes:
+      - ./DjangoAdmin:/app
       - static_volume:/app/static
       - media_volume:/app/media
-      - ./DjangoAdmin:/app/
     depends_on:
       cinema_postgres:
         condition: service_started

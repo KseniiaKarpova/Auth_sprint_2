@@ -84,4 +84,5 @@ if __name__ == '__main__':
         app,
         log_config=LOGGING,
         log_level=logging.DEBUG,
+        reload=True,
     )
