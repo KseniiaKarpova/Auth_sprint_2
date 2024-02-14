@@ -9,7 +9,7 @@ services:
       context: DjangoAdmin
       dockerfile: Dockerfile
     container_name: django_admin
-    command: gunicorn config.asgi:application --config config/gunicorn_config.py --reload
+    command: gunicorn config.asgi:application --config config/gunicorn_config.py
     environment:
       PYTHONPATH: /app
     expose:
