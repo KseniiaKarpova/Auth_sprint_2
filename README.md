@@ -87,8 +87,3 @@ docker exec file_api pytest /app/test.py
 
 **URL** : http://localhost:16686/search
 
-### Test:
-```commandline
-curl -H 'X-Request-Id: my-Request-Id_1' -H 'X-Forwarded-For: test' http://127.0.0.1:8002/api/v1/genres/
-```
-
