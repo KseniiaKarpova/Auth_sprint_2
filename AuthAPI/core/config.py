@@ -29,6 +29,8 @@ class RedisSettings(BaseSettings):
 class AuthSettings(BaseSettings):
     secret_key: str = ...
     jwt_algorithm: str = ...
+    google_client_id: str = ...
+    google_client_secret: str = ...
     model_config: str = SettingsConfigDict(env_prefix='auth_')
 
 
@@ -52,6 +54,5 @@ class APPSettings(BaseSettings):
     auth: AuthSettings = AuthSettings()
     hasher: HasherSettings = HasherSettings()
     jaeger: JaegerSettings = JaegerSettings()
-
 
 settings = APPSettings()

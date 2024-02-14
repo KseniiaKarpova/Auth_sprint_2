@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, Body
+from fastapi import APIRouter, Depends, Header, Body, Request
 from redis.asyncio import Redis
 
 from db.redis import get_redis
@@ -10,7 +10,6 @@ from schemas.auth import (
     UserLogin)
 from services.auth import get_auth_service, AuthService
 from core.handlers import get_auth_handler, JwtHandler, AuthHandler, require_access_token, require_refresh_token
-
 
 router = APIRouter()
 
