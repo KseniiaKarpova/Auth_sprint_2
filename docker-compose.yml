@@ -28,7 +28,7 @@ services:
   cinema_api:
     container_name: cinema-api
     image: cinema_api
-    command: gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:7000
+    command: gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:7000 --reload
     env_file:
       - .env
     environment:
@@ -52,7 +52,7 @@ services:
 
   file_api:
     container_name: file_api
-    command: gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:7070
+    command: gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:7070 --reload
     env_file:
       - .env
     build:
@@ -187,7 +187,7 @@ services:
 #______________Auth_______________
   auth_api:
     container_name: AuthAPI
-    command: gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:9999
+    command: gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:9999 --reload
     env_file:
       - .env
     environment:
