@@ -5,3 +5,5 @@ django-split-settings==1.2.0
 uwsgi==2.0.22
 psycopg2-binary~=2.9
 requests==2.31.0
+gunicorn==20.1.0
+uvicorn==0.24.0.post1

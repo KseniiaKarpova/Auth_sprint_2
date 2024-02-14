@@ -1,12 +1,11 @@
 from functools import lru_cache
 
-from fastapi import Depends, UploadFile
-
 from core.config import bucket_settings
 from db import AbstractStorage
 from db.minio import MinioStorage
 from db.postgres import PostgresStorage
 from db.proxy_storage import ProxyStorage
+from fastapi import Depends, UploadFile
 from services import AbstractService
 
 

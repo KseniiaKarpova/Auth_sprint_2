@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from exceptions import server_error
 from fastapi import Depends
 from services import AbstractCrudService
 from storages.role import RoleStorage

@@ -1,12 +1,11 @@
 import uuid
+from datetime import datetime
 from typing import List
 
-from sqlalchemy import ForeignKey, MetaData, types
+from sqlalchemy import ForeignKey, MetaData, String, Text, types
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import String, Text
-from datetime import datetime
 
 metadata = MetaData()
 

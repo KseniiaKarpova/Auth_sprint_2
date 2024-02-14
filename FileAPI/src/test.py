@@ -1,16 +1,16 @@
+import pytest
+from core.config import bucket_settings
+from db.minio import MinioStorage
+from db.postgres import PostgresStorage
+from db.proxy_storage import ProxyStorage
 from fastapi import UploadFile
 from services.file import FileService
-import pytest
-from db.proxy_storage import ProxyStorage
-from db.postgres import PostgresStorage
-from db.minio import MinioStorage
-from core.config import bucket_settings
+import random
+import string
 
 
 pytest_plugins = ('pytest_asyncio',)
 
-
-import random, string
 
 def randomword(length):
    letters = string.ascii_lowercase
@@ -20,7 +20,7 @@ def randomword(length):
 @pytest.mark.asyncio
 async def test_file_service_object_upload(mocker):
     mock_file = mocker.Mock(spec=UploadFile)
-    mock_file.filename='movie.mp4'
+    mock_file.filename = 'movie.mp4'
     mock_file.content_type = 'mp4'
     mock_file.size = 256
 

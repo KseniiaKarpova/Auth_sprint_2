@@ -1,12 +1,13 @@
-from async_fastapi_jwt_auth import AuthJWT
 from fastapi import APIRouter, Depends, Header, Body
 from redis.asyncio import Redis
 
 from db.redis import get_redis
 from schemas.auth import (
-    AuthSettingsSchema, LoginResponseSchema,
-    UserCredentials, UserUpdate,
-    UserLogin, UserData)
+    AuthSettingsSchema,
+    LoginResponseSchema,
+    UserCredentials,
+    UserUpdate,
+    UserLogin)
 from services.auth import get_auth_service, AuthService
 from core.handlers import get_auth_handler, JwtHandler, AuthHandler, require_access_token, require_refresh_token
 
@@ -45,9 +46,7 @@ async def logout(
     return {"detail": "User successfully logged out"}
 
 
-@router.post(
-        "/registration",
-        response_model=UserData)
+@router.post("/registration")
 async def registration(
         user_credentials: UserCredentials,
         service: AuthService = Depends(get_auth_service)):

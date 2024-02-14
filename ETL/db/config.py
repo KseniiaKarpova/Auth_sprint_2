@@ -1,9 +1,9 @@
 import os
 
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
 

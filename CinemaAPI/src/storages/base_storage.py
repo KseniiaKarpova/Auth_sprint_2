@@ -1,6 +1,6 @@
-from abc import abstractmethod, ABC
-from uuid import UUID
+from abc import ABC, abstractmethod
 from typing import Any
+from uuid import UUID
 
 
 class BaseStorage(ABC):
@@ -14,7 +14,6 @@ class BaseStorage(ABC):
 
 
 class BaseCache(ABC):
-
     @abstractmethod
     async def get_from_cache(self, url: str):
         pass

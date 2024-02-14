@@ -2,7 +2,6 @@ import json
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi import Depends
 from schemas.auth import JWTUserData, LoginResponseSchema, UserLogin, AuthSettingsSchema
-from uuid import UUID
 from exceptions import incorrect_credentials, unauthorized, forbidden_error, server_error
 from core.hasher import DataHasher
 from sqlalchemy.ext.asyncio import AsyncSession

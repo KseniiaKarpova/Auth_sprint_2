@@ -7,6 +7,8 @@ from exceptions import order_by_field_not_found
 from sqlalchemy.exc import IntegrityError
 from exceptions import integrity_error
 from db.postgres import commit_async_session
+from utils.jaeger import tracer
+
 
 class AlchemyBaseStorage(ABC):
     table: Base = None
@@ -27,7 +29,7 @@ class AlchemyBaseStorage(ABC):
             if field_name[0] == "-":
                 return desc, field_name.replace('-', '')
         except IndexError:
-            raise 
+            raise
         return asc, field_name
 
     async def get_attribute(self, field_name: str):
@@ -52,7 +54,8 @@ class AlchemyBaseStorage(ABC):
     async def paginate(self):
         query: Query = getattr(self, 'query', None)
         setattr(self, 'query', query.limit(self.limit).offset(self.offset))
-    
+
+
     async def select_actives(self, conditions: dict):
         conditions.update({
             'is_active': True
@@ -126,7 +129,8 @@ class AlchemyBaseStorage(ABC):
     async def execute(self, query: Query):
         async with self.session:
             try:
-                instance = await self.session.execute(query)
+                with tracer.start_as_current_span('storage-request'):
+                    instance = await self.session.execute(query)
             except IntegrityError:
                 raise integrity_error
         return instance
@@ -134,7 +138,8 @@ class AlchemyBaseStorage(ABC):
     async def execute_and_commit(self, query: Query):
         async with self.session:
             try:
-                instance = await self.session.execute(query)
+                with tracer.start_as_current_span('storage-request'):
+                    instance = await self.session.execute(query)
             except IntegrityError:
                 raise integrity_error
             if self.commit_mode is True:

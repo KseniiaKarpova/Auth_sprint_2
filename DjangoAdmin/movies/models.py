@@ -1,9 +1,10 @@
 import uuid
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from .storage import CustomStorage
 
+from .storage import CustomStorage
 
 
 class TimeStampedMixin(models.Model):

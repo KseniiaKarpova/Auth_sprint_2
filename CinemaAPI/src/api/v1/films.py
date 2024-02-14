@@ -94,5 +94,5 @@ async def download_film(
     if not file_name:
         raise file_not_found
     return {
-        "url": f'{settings.file_api.full_path}/download-stream/{file_name}/'
+        "url": f'http://{settings.file_api.full_path}/download-stream/{file_name}/'
     }

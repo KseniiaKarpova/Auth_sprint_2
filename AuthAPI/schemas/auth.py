@@ -1,8 +1,9 @@
 from datetime import timedelta
-from pydantic import BaseModel, Field, validator
 from uuid import UUID
+
 from core.config import settings
 from core.hasher import DataHasher
+from pydantic import BaseModel, Field, validator
 
 
 class UserCredentials(BaseModel):

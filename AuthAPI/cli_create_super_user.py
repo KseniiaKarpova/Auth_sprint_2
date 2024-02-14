@@ -1,13 +1,18 @@
-import typer
 import asyncio
-from storages.user import UserStorage
-from core.hasher import DataHasher
+import logging
+
+import typer
 from core import config
+from core.hasher import DataHasher
 from db import postgres
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
+from storages.user import UserStorage
+
 settings = config.APPSettings()
+logging.getLogger('asyncio').setLevel(logging.WARNING)
+
 
 def create(login: str, password: str):
     try:
@@ -35,8 +40,6 @@ def create(login: str, password: str):
         asyncio.run(save())
 
         print(f"Creating Super User: {login}")
-
-
 
     except Exception as e:
         print('Can`t create Super User')

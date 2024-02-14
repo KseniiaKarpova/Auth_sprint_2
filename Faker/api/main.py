@@ -2,7 +2,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 from api.sqlite_to_postgres.load_data import run
 from dotenv import load_dotenv
-
 from fastapi import FastAPI
 
 executor = ThreadPoolExecutor(max_workers=3)

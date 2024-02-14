@@ -1,6 +1,5 @@
-from passlib import hash
-
 from core.config import settings
+from passlib import hash
 
 
 class DataHasher:
