@@ -19,7 +19,8 @@ settings = config.Settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    configure_tracer(host=settings.jaeger_host, port=settings.jaeger_port, service_name=settings.project_name)
+    if settings.jaeger_enable:
+        configure_tracer(host=settings.jaeger_host, port=settings.jaeger_port, service_name=settings.project_name)
 
     redis.redis = Redis(host=settings.redis_host, port=settings.redis_port)
     elastic.es = AsyncElasticsearch(hosts=[f'http://{settings.es_host}:{settings.es_port}'])
@@ -40,13 +41,13 @@ app = FastAPI(
 
 @app.middleware('http')
 async def before_request(request: Request, call_next):
-    user = request.headers.get('X-Forwarded-For')
-    result = await RequestLimit().is_over_limit(user=user)
-    if result:
-        return ORJSONResponse(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            content={'detail': 'Too many requests'}
-        )
+    #user = request.headers.get('X-Forwarded-For')
+    #result = await RequestLimit().is_over_limit(user=user)
+    #if result:
+    #    return ORJSONResponse(
+    #        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+    #        content={'detail': 'Too many requests'}
+    #    )
 
     response = await call_next(request)
     request_id = request.headers.get('X-Request-Id')
