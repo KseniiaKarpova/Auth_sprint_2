@@ -2,10 +2,12 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import ForeignKey, MetaData, String, Text, types
+from sqlalchemy import ForeignKey, MetaData, String, Text, types, UniqueConstraint, Enum, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, backref
+import enum
+
 
 metadata = MetaData()
 
@@ -83,6 +85,41 @@ class UserHistory(Base):
     user_agent: Mapped[str] = mapped_column(String(255), nullable=True)
     refresh_token: Mapped[str] = mapped_column(Text(), nullable=True)
     user: Mapped['User'] = relationship(back_populates='user_history')
+
+
+class SocialNetworksEnum(enum.Enum):
+    Yandex = 'yandex'
+    Google = 'google'
+    VK = 'vk'
+
+
+class SocialAccount(Base):
+    __tablename__ = 'user_social_services'
+
+    uuid: Mapped[UUID] = mapped_column(types.Uuid,
+                                       default=uuid.uuid4,
+                                       primary_key=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey('users.uuid'),
+                                          onupdate='CASCADE',
+                                          nullable=False)
+    user = relationship(
+        User,
+        backref=backref('user_social_services', cascade='all,delete', lazy=True),
+    )
+
+    social_user_id = Mapped[str] = mapped_column(Text)
+    type = Mapped[str] = mapped_column(Enum(SocialNetworksEnum), nullable=False)
+    data = Mapped[JSON] = mapped_column(JSON, nullable=True)
+
+    __table_args__ = (UniqueConstraint('social_user_id', 'type'),)
+
+    def __init__(
+        self, user_id: UUID, social_user_id: str, type: SocialNetworksEnum, data: str | None = None
+    ) -> None:
+        self.user_id = user_id
+        self.social_user_id = social_user_id
+        self.type = type
+        self.data = data
 
 
 """
