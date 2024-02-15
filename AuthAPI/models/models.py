@@ -114,10 +114,10 @@ class SocialAccount(Base):
             lazy=True),
     )
 
-    social_user_id = Mapped[str] = mapped_column(Text)
-    type = Mapped[str] = mapped_column(
+    social_user_id: Mapped[str] = mapped_column(Text)
+    type: Mapped[str] = mapped_column(
         Enum(SocialNetworksEnum), nullable=False)
-    data = Mapped[JSON] = mapped_column(JSON, nullable=True)
+    data: Mapped[JSON] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (UniqueConstraint('social_user_id', 'type'),)
 
