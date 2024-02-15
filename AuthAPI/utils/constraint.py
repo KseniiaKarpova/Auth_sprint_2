@@ -1,10 +1,11 @@
-from db.redis import get_redis
 from datetime import datetime
+
+from db.redis import get_redis
 
 
 class RequestLimit:
-    DURATION = 60 # 1min
-    LIMIT =200
+    DURATION = 60  # 1min
+    LIMIT = 200
 
     def __init__(self, duration: int = None, limit: int = None):
         self.pipeline = get_redis().pipeline(transaction=True)

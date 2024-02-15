@@ -8,7 +8,6 @@ from sqlalchemy.orm import DeclarativeBase
 
 from . import MetaData
 
-
 metadata = MetaData()
 
 

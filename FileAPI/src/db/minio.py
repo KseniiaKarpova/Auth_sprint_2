@@ -21,9 +21,8 @@ class MinioStorage(AbstractStorage):
     async def save(self, file: UploadFile, bucket: str, path: str):
 
         await self.client.put_object(
-            bucket_name=bucket, object_name=path+file.filename, data=file, length=-1, part_size=10 * 1024 * 1024,
+            bucket_name=bucket, object_name=path + file.filename, data=file, length=-1, part_size=10 * 1024 * 1024,
         )
-
 
     async def get(self, bucket: str, path: str) -> StreamingResponse:
         try:

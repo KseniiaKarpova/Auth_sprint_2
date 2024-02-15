@@ -1,5 +1,5 @@
-import orjson
 from pydantic import BaseModel
+
 
 class Base0rjsonSchema(BaseModel):
     class Config:

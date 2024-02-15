@@ -15,7 +15,8 @@ class SqlExecuter:
             colums_name = [field.name for field in fields(datatype)]
 
             curs = self.connect.cursor()
-            curs.execute(f"SELECT {', '.join(colums_name)} FROM {table_name}  WHERE id LIKE '%{i}';")
+            curs.execute(
+                f"SELECT {', '.join(colums_name)} FROM {table_name}  WHERE id LIKE '%{i}';")
 
             # сохранение полученных записей в тип датакласса
             result = []
@@ -46,12 +47,14 @@ class SqlExecuter:
             return count_rows[0][0]
 
         except Exception as e:
-            logger.exception(f'Не удалось получить кол-во данных из {table_name}. {e}')
+            logger.exception(
+                f'Не удалось получить кол-во данных из {table_name}. {e}')
             return 0
 
 
 class PostgresSaver(SqlExecuter):
     """Обработка данных для Postgres """
+
     def get_count_rows(self, table_name: str, colums_name: str) -> int:
         return len(self.extract_data(table_name, colums_name))
 
@@ -65,9 +68,9 @@ class PostgresSaver(SqlExecuter):
             curs = self.connect.cursor()
             bind_values = [astuple(row) for row in data]
             query = f'''
-                INSERT INTO content.{table_name}  
-                ({", ".join(colums_name)}) 
-                VALUES ({col_count}) 
+                INSERT INTO content.{table_name}
+                ({", ".join(colums_name)})
+                VALUES ({col_count})
                 ON CONFLICT ({", ".join(conflict_name_colums)}) DO NOTHING;
             '''
             execute_batch(curs, query, bind_values)

@@ -1,12 +1,12 @@
 from abc import ABC
-from sqlalchemy import and_, select, update, desc, asc
-from sqlalchemy.orm import Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from models.models import Base
-from exceptions import order_by_field_not_found
-from sqlalchemy.exc import IntegrityError
-from exceptions import integrity_error
+
 from db.postgres import commit_async_session
+from exceptions import integrity_error, order_by_field_not_found
+from models.models import Base
+from sqlalchemy import and_, asc, desc, select, update
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Query
 from utils.jaeger import tracer
 
 
@@ -55,7 +55,6 @@ class AlchemyBaseStorage(ABC):
         query: Query = getattr(self, 'query', None)
         setattr(self, 'query', query.limit(self.limit).offset(self.offset))
 
-
     async def select_actives(self, conditions: dict):
         conditions.update({
             'is_active': True
@@ -64,10 +63,12 @@ class AlchemyBaseStorage(ABC):
 
     async def generate_where(self, conditions: dict):
         conditions = await self.select_actives(conditions)
-        return and_(*[getattr(self.table, field) == value for field, value in conditions.items()])
+        return and_(*[getattr(self.table, field) ==
+                    value for field, value in conditions.items()])
 
     async def schoose_attributes(self, attributes: list[str]):
-        return [getattr(self.table, field) for field in attributes] if attributes else self.table
+        return [getattr(self.table, field)
+                for field in attributes] if attributes else self.table
 
     async def generate_query(self, conditions: dict, attributes: dict = None) -> table:
         where_condition = await self.generate_where(conditions)
@@ -86,7 +87,7 @@ class AlchemyBaseStorage(ABC):
         query = await self.generate_query(attributes=attributes, conditions=conditions)
         instance = (await self.execute(query)).scalar()
         return instance
-    
+
     async def get_many(self, conditions: dict, attributes: dict = None) -> list[table]:
         """
         SELECT from self.table by specified attributes. Return many objects

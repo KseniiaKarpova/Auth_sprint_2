@@ -8,9 +8,13 @@ from .managers import MyUserManager
 
 # Create your models here.
 
+
 class User(AbstractBaseUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
+    email = models.EmailField(
+        verbose_name='email address',
+        max_length=255,
+        unique=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     first_name = models.CharField(max_length=255)
@@ -18,9 +22,10 @@ class User(AbstractBaseUser):
     created = models.DateTimeField(_('created'), auto_now_add=True)
     modified = models.DateTimeField(_('modified'), auto_now=True)
 
-    # строка с именем поля модели, которая используется в качестве уникального идентификатора
+    # строка с именем поля модели, которая используется в качестве уникального
+    # идентификатора
     USERNAME_FIELD = 'email'
-    
+
     # менеджер модели
     objects = MyUserManager()
 

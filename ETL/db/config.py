@@ -1,11 +1,10 @@
-import os
-
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
 load_dotenv()
+
 
 class PostgresSettings(BaseSettings):
     name: str = ...
@@ -19,8 +18,10 @@ class PostgresSettings(BaseSettings):
     @property
     def url(self) -> str:
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
-    
+
+
 settings = PostgresSettings()
+
 
 engine = create_engine(
     settings.url,
