@@ -32,7 +32,8 @@ settings = config.APPSettings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    configure_tracer(host=settings.jaeger.host, port=settings.jaeger.port, service_name=settings.project_name)
+    if settings.jaeger.enable:
+        configure_tracer(host=settings.jaeger.host, port=settings.jaeger.port, service_name=settings.project_name)
 
     redis.redis = Redis(host=settings.redis.host, port=settings.redis.port)
     postgres.async_engine = create_async_engine(
