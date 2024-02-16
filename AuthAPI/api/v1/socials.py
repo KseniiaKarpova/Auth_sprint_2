@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Request, Query
-from starlette.requests import Request as starler_request
 from core.oauth2 import google_client
 from core.config import settings
 
