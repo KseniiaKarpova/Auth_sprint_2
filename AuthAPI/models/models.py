@@ -1,7 +1,6 @@
 import enum
 import uuid
 from datetime import datetime
-from typing import List
 
 from sqlalchemy import (JSON, Enum, ForeignKey, MetaData, String, Text,
                         UniqueConstraint, types)
@@ -9,6 +8,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import (DeclarativeBase, Mapped, backref, mapped_column,
                             relationship)
+
+from models.choices import SocialNetworksEnum
+
 
 metadata = MetaData()
 
@@ -39,7 +41,7 @@ class User(Base):
     user_roles: Mapped[list['UserRole']] = relationship(back_populates='user',
                                                         cascade='all, delete',
                                                         passive_deletes=True)
-    user_history: Mapped[List['UserHistory']] = relationship(
+    user_history: Mapped[list['UserHistory']] = relationship(
         back_populates='user', cascade='all, delete', passive_deletes=True)
 
 
@@ -120,17 +122,6 @@ class SocialAccount(Base):
     data: Mapped[JSON] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (UniqueConstraint('social_user_id', 'type'),)
-
-    def __init__(
-            self,
-            user_id: UUID,
-            social_user_id: str,
-            type: SocialNetworksEnum,
-            data: str | None = None) -> None:
-        self.user_id = user_id
-        self.social_user_id = social_user_id
-        self.type = type
-        self.data = data
 
 
 """

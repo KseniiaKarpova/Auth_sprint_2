@@ -19,7 +19,6 @@ async def create_role(
     name: str | None = None,
 ):
     user = await jwt_handler.get_current_user()
-    print(user.uuid, 'user_id')
     result = await service.create_role(name)
     return result
 
@@ -59,7 +58,6 @@ async def set_role(
     new: dict | None = None,
 ):
     user = await jwt_handler.is_super_user()
-    print(user.uuid, 'user_id')
     result = await service.set_role(old, new)
     if not result:
         raise role_not_found
