@@ -4,6 +4,7 @@ from uuid import UUID
 from core.config import settings
 from core.hasher import DataHasher
 from pydantic import BaseModel, Field, validator
+from core.hasher import fake
 
 
 class UserCredentials(BaseModel):
@@ -18,11 +19,28 @@ class UserLogin(BaseModel):
     agent: str
 
 
-class UserData(BaseModel):
-    password: str
-    email: str
-    surname: str | None
-    name: str | None
+class UserAuthData(BaseModel):
+    email: str | None = Field(None, description="email")
+    surname: str | None = Field(None, description="surname")
+    name: str | None = Field(None, description="name")
+
+    @validator("email")
+    def email_generating(cls, value):
+        if not value:
+            return fake.ascii_company_email()
+        return value
+    
+    @validator("surname")
+    def surname_generating(cls, value):
+        if not value:
+            return fake.last_name()
+        return value
+    
+    @validator("name")
+    def name_generating(cls, value):
+        if not value:
+            return fake.first_name()
+        return value
 
 
 class AuthSettingsSchema(BaseModel):
@@ -53,3 +71,10 @@ class UserUpdate(BaseModel):
         if not value:
             return None
         return DataHasher().sync_generater(secret_word=value)
+
+
+class SocialData(BaseModel):
+    user: UserData
+    social_user_id: str
+    type: str
+    data: dict

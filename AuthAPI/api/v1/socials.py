@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, Depends
+from services.socials import SocialAccountService, get_social_service
 from core.oauth2 import google_client
 from core.config import settings
+from schemas.auth import SocialData, UserAuthData
+from models.models import SocialNetworksEnum
 
 router = APIRouter()
 
@@ -17,7 +20,18 @@ async def main_page(
 async def auth2(
         request: Request,
         code: str = Query(description='Code from auth provider'),
+        service: SocialAccountService = Depends(get_social_service)
     ):
-    data = await google_client.fetch_token(settings.auth.google_token_url
+    data: dict = await google_client.fetch_token(settings.auth.google_token_url
                                     ,authorization_response=code)
-    return data
+    return await service.authorize(social_data=SocialData(
+        user=UserAuthData(
+            email=data.get('default_email'),
+            name=data.get('first_name'),
+            surname=data.get('last_name')
+        ),
+        data=data,
+        social_user_id=data.get('id'),
+        type=SocialNetworksEnum.Google
+    )
+    )

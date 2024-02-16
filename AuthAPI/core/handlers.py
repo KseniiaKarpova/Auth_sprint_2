@@ -131,7 +131,9 @@ class AuthHandler:
             access_token=await self.generate_access_token(subject=subject))
 
     async def check_credentials(self, credentials: UserLogin) -> User:
-        user, roles = await self.storage.with_roles(login=credentials.login)
+        user, roles = await self.storage.with_roles(conditions={
+            'login': credentials.login,
+        })
         if not user:
             raise incorrect_credentials
         is_valid = await DataHasher().verify(secret_word=credentials.password, hashed_word=user.password)

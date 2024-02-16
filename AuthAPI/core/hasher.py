@@ -1,6 +1,9 @@
 from core.config import settings
 from passlib import hash
+from faker import Faker
+import random as rd
 
+fake = Faker()
 
 class DataHasher:
     def __init__(self) -> None:
@@ -29,3 +32,10 @@ class DataHasher:
     def sync_generater(self, secret_word: str):
         hasher = self.get_hasher()
         return hasher.hash(secret=secret_word)
+
+    async def random_password(self):
+        choices = [
+            f"{fake.last_name()}{fake.first_name()}",
+            rd.randint(-1000000000, 100000000)]
+        random_password = rd.choice(choices)
+        return await self.generate_word_hash(secret_word=random_password)

@@ -5,10 +5,8 @@ import uvicorn
 from api.v1 import auth as auth_api
 from api.v1 import role, user_history
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
-from authlib.integrations.starlette_client import OAuthError
 from core import config, logger
 from db import postgres, redis
-from exceptions import server_error
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse, ORJSONResponse
@@ -19,13 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.requests import Request as starler_request
 from utils.constraint import RequestLimit
 from utils.jaeger import configure_tracer
-from exceptions import server_error
-from authlib.integrations.starlette_client import OAuthError
-from starlette.requests import Request as starler_request
-from starlette.responses import RedirectResponse
 from authlib.integrations.httpx_client import AsyncOAuth2Client
 from core import oauth2
 
@@ -106,39 +99,16 @@ app.include_router(
     router=auth_api.router,
     prefix="/api/v1/auth",
     tags=["auth"])
-app.include_router(router=role.router, prefix="/api/v1/role", tags=["role"])
+app.include_router(
+    router=role.router,
+    prefix="/api/v1/role",
+    tags=["role"])
 app.include_router(
     router=user_history.router,
     prefix="/api/v1/user_history",
     tags=["role"])
 app.add_middleware(SessionMiddleware, secret_key=settings.auth.secret_key)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-
-
-@app.route('/auth')
-async def auth2(request: starler_request):
-    try:
-        token = await oauth.google.authorize_access_token(request)
-    except OAuthError:
-        raise server_error
-    user = token.get('userinfo')
-    print(user, '#############')
-    if user:
-        request.session['user'] = dict(user)
-    return RedirectResponse(url='/')
-
-
-@app.route('/authorize')
-async def authorize(request: starler_request):
-    try:
-        token = await oauth.google.authorize_access_token(request)
-    except OAuthError:
-        raise server_error
-    user = token.get('userinfo')
-    print(user, '#############')
-    if user:
-        request.session['user'] = dict(user)
-    return RedirectResponse(url='/')
 
 
 if __name__ == '__main__':

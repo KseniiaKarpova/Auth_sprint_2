@@ -80,7 +80,7 @@ class AlchemyBaseStorage(ABC):
         instance = (await self.execute(query)).scalar()
         return bool(instance)
 
-    async def get(self, conditions: dict, attributes: dict = None) -> table:
+    async def get(self, conditions: dict, attributes: dict = None) -> table.__class__:
         """
         SELECT from self.table by specified attributes. Return one objects
         """
@@ -103,8 +103,10 @@ class AlchemyBaseStorage(ABC):
         INSERT record
         """
         instance = self.table(**params)
-        self.session.add(instance)
-        await commit_async_session(session=self.session)
+        if self.commit_mode is True:
+            self.session.add(instance)
+            await commit_async_session(session=self.session)
+            return instance
         return instance
 
     async def delete(self, conditions: dict):
