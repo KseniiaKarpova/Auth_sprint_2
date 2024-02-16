@@ -29,13 +29,13 @@ class UserAuthData(BaseModel):
         if not value:
             return fake.ascii_company_email()
         return value
-    
+
     @validator("surname")
     def surname_generating(cls, value):
         if not value:
             return fake.last_name()
         return value
-    
+
     @validator("name")
     def name_generating(cls, value):
         if not value:
@@ -74,7 +74,7 @@ class UserUpdate(BaseModel):
 
 
 class SocialData(BaseModel):
-    user: UserData
+    user: JWTUserData
     social_user_id: str
     type: str
     data: dict

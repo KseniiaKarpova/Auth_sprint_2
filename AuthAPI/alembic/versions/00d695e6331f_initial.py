@@ -57,7 +57,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.uuid'], ),
     sa.UniqueConstraint('social_user_id', 'type')
     )
-    social_services_type.create(op.get_bind(), checkfirst=False)
+    #social_services_type.create(op.get_bind(), checkfirst=False)
     op.execute('ALTER TABLE user_social_services ALTER COLUMN type TYPE type'
                ' USING type::text::type')
 
