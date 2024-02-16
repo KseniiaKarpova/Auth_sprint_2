@@ -1,11 +1,13 @@
 import uuid
 from datetime import datetime
-from typing import List
 
-from sqlalchemy import ForeignKey, MetaData, String, Text, types
+from sqlalchemy import ForeignKey, MetaData, String, Text, types, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from models.choices import SocialNetworksEnum
+
 
 metadata = MetaData()
 
@@ -32,9 +34,16 @@ class User(Base):
     user_roles: Mapped[list['UserRole']] = relationship(back_populates='user',
                                                  cascade='all, delete',
                                                  passive_deletes=True)
-    user_history: Mapped[List['UserHistory']] = relationship(back_populates='user',
-                                                             cascade='all, delete',
-                                                             passive_deletes=True)
+
+    user_history: Mapped[list['UserHistory']] = relationship(
+        back_populates='user',
+        cascade='all, delete',
+        passive_deletes=True)
+
+    social_accounts: Mapped[list["UserSocialAccount"]] = relationship(
+        back_populates="user",
+        cascade="all, delete",
+        passive_deletes=True, )
 
 
 class Role(Base):

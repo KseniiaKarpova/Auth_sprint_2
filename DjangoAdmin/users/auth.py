@@ -13,13 +13,14 @@ class CustomBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         url = f"http://{settings.AUTH_API_HOST}:{settings.AUTH_API_PORT}/api/v1/auth/registration"
         payload = {'email': username, 'password': password}
-        response = requests.post(url, data=json.dumps(payload))
-        print(response, '#########################')
+        try:
+            response = requests.post(url, data=json.dumps(payload))
+        except Exception as err:
+            return None
         if response.status_code != http.HTTPStatus.OK:
             return None
         
         data = response.json()
-        print(data)
         try:
             user, created = User.objects.get_or_create(id=data['id'],)
             user.email = data.get('email')
@@ -30,7 +31,6 @@ class CustomBackend(BaseBackend):
             user.save()
         except Exception:
             return None
-
         return user
 
     def get_user(self, user_id):

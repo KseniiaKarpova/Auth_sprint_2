@@ -26,7 +26,10 @@ from utils.jaeger import configure_tracer
 from exceptions import server_error
 from authlib.integrations.starlette_client import OAuthError
 from starlette.requests import Request as starler_request
-from oauth2 import oauth
+from starlette.responses import RedirectResponse
+from authlib.integrations.httpx_client import AsyncOAuth2Client
+from core import oauth2
+
 
 settings = config.APPSettings()
 
@@ -36,18 +39,24 @@ async def lifespan(app: FastAPI):
 
     redis.redis = Redis(host=settings.redis.host, port=settings.redis.port)
     postgres.async_engine = create_async_engine(
-            settings.db_dsn,
-            poolclass=QueuePool,
-            pool_pre_ping=True, pool_size=20, pool_timeout=30)
+        settings.db_dsn,
+        poolclass=QueuePool,
+        pool_pre_ping=True, pool_size=20, pool_timeout=30)
     postgres.async_session_factory = sessionmaker(
-            postgres.async_engine,
-            expire_on_commit=False,
-            autoflush=True,
-            class_=AsyncSession)
+        postgres.async_engine,
+        expire_on_commit=False,
+        autoflush=True,
+        class_=AsyncSession)
+    oauth2.google_client = AsyncOAuth2Client(
+        client_id=settings.auth.google_client_id,
+        client_secret=settings.auth.google_client_secret,
+        redirect_uri=settings.auth.google_redirect_url,
+    scope='openid email profile')
     yield
     await postgres.async_engine.dispose()
     postgres.async_session_factory.close_all()
     await redis.redis.close()
+    await oauth2.google_client.aclose()
 
 
 app = FastAPI(
@@ -90,25 +99,32 @@ app.include_router(router=user_history.router, prefix="/api/v1/user_history", ta
 app.add_middleware(SessionMiddleware, secret_key=settings.auth.secret_key)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-@app.get('/api/v1/signin')
-async def google_login(request: starler_request):
-    # absolute url for callback
-    # we will define it below
-    redirect_uri = request.url_for('auth')
-    await oauth.google.authorize_redirect(request, redirect_uri)
-    return {'ok': True}
 
-
-@app.route('/api/v1/auth')
-async def auth(request: starler_request):
+@app.route('/auth')
+async def auth2(request: starler_request):
     try:
         token = await oauth.google.authorize_access_token(request)
     except OAuthError:
         raise server_error
-    # <=0.15
-    # user = await oauth.google.parse_id_token(request, token)
-    user = token['userinfo']
-    return user
+    user = token.get('userinfo')
+    print(user, '#############')
+    if user:
+        request.session['user'] = dict(user)
+    return RedirectResponse(url='/')
+
+
+@app.route('/authorize')
+async def authorize(request: starler_request):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+    except OAuthError:
+        raise server_error
+    user = token.get('userinfo')
+    print(user, '#############')
+    if user:
+        request.session['user'] = dict(user)
+    return RedirectResponse(url='/')
+
 
 if __name__ == '__main__':
     uvicorn.run(
