@@ -16,20 +16,19 @@ class AbstractSocialAuthService(BaseService):
         pass
 
 
-
 class SocialAccountService(AbstractSocialAuthService):
     def __init__(
-            self, 
+            self,
             user_storage: UserStorage,
             auth_handler: AuthHandler,
-            ) -> None:
+    ) -> None:
         self.user_storage = user_storage
         self.auth_handler = auth_handler
-    
+
     async def authorize(self, social_data: SocialData):
         user: User = await self.user_storage.with_roles(conditions={
             'email': social_data.user.email,
-            })
+        })
         if not user:
             user, social_account = await self.user_storage.create_with_social_acc(social_data=social_data)
 

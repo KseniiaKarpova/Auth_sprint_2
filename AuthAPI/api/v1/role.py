@@ -18,7 +18,7 @@ async def create_role(
     service: CrudService = Depends(get_crud_service),
     name: str | None = None,
 ):
-    user = await jwt_handler.get_current_user()
+    await jwt_handler.get_current_user()
     result = await service.create_role(name)
     return result
 
@@ -57,7 +57,7 @@ async def set_role(
     old: dict | None = None,
     new: dict | None = None,
 ):
-    user = await jwt_handler.is_super_user()
+    await jwt_handler.is_super_user()
     result = await service.set_role(old, new)
     if not result:
         raise role_not_found

@@ -21,9 +21,9 @@ async def auth2(
         request: Request,
         code: str = Query(description='Code from auth provider'),
         service: SocialAccountService = Depends(get_social_service)
-    ):
-    data: dict = await google_client.fetch_token(settings.auth.google_token_url
-                                    ,authorization_response=code)
+):
+    data: dict = await google_client.fetch_token(settings.auth.google_token_url,
+                                                 authorization_response=code)
     return await service.authorize(social_data=SocialData(
         user=UserAuthData(
             email=data.get('default_email'),

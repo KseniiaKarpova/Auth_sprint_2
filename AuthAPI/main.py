@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
         client_id=settings.auth.google_client_id,
         client_secret=settings.auth.google_client_secret,
         redirect_uri=settings.auth.google_redirect_url,
-    scope='openid email profile')
+        scope='openid email profile')
     yield
     await postgres.async_engine.dispose()
     postgres.async_session_factory.close_all()

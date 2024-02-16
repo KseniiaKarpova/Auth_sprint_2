@@ -5,6 +5,7 @@ import random as rd
 
 fake = Faker()
 
+
 class DataHasher:
     def __init__(self) -> None:
         self.algorithm = settings.hasher.algorithm

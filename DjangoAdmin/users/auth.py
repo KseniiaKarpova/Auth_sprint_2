@@ -15,7 +15,7 @@ class CustomBackend(BaseBackend):
         payload = {'email': username, 'password': password}
         try:
             response = requests.post(url, data=json.dumps(payload))
-        except Exception as err:
+        except Exception:
             return None
         if response.status_code != http.HTTPStatus.OK:
             return None
