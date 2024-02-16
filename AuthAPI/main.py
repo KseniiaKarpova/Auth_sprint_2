@@ -108,7 +108,7 @@ app.include_router(
     tags=["role"])
 
 app.include_router(
-    router=user_history.router,
+    router=socials.router,
     prefix="/api/v1/socials",
     tags=["social_auth"])
 
