@@ -85,4 +85,4 @@
     AUTH_GOOGLE_BASE_URL='https://accounts.google.com/o/oauth2/v2/auth'
     AUTH_GOOGLE_TOKEN_URL='https://www.googleapis.com/oauth2/v4/token'
     AUTH_GOOGLE_USERINFO_URL='https://www.googleapis.com/oauth2/v1/userinfo'
-    AUTH_GOOGLE_REDIRECT_URL="http://127.0.0.1:8001/auth"
+    AUTH_GOOGLE_REDIRECT_URL="http://127.0.0.1:8001/api/v1/socials/auth"

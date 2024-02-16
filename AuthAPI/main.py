@@ -3,14 +3,13 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from api.v1 import auth as auth_api
-from api.v1 import role, user_history
+from api.v1 import role, user_history, socials
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from core import config, logger
 from db import postgres, redis
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse, ORJSONResponse
-from oauth2 import oauth
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -107,6 +106,12 @@ app.include_router(
     router=user_history.router,
     prefix="/api/v1/user_history",
     tags=["role"])
+
+app.include_router(
+    router=user_history.router,
+    prefix="/api/v1/socials",
+    tags=["social_auth"])
+
 app.add_middleware(SessionMiddleware, secret_key=settings.auth.secret_key)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
