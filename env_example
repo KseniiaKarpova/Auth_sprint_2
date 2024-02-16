@@ -80,5 +80,9 @@
     JAEGER_PORT=6831
     JAEGER_ENABLE=False
 
-    AUTH_GOOGLE_CLIENT_ID=
-    AUTH_GOOGLE_CLIENT_SECRET=
+    AUTH_GOOGLE_CLIENT_ID=560238270570-ii2itecbdi2n6f409bvi3sfqc46qglha.apps.googleusercontent.com
+    AUTH_GOOGLE_CLIENT_SECRET=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
+    AUTH_GOOGLE_BASE_URL='https://accounts.google.com/o/oauth2/v2/auth'
+    AUTH_GOOGLE_TOKEN_URL='https://www.googleapis.com/oauth2/v4/token'
+    AUTH_GOOGLE_USERINFO_URL='https://www.googleapis.com/oauth2/v1/userinfo'
+    AUTH_GOOGLE_REDIRECT_URL="http://127.0.0.1:8001/auth"
