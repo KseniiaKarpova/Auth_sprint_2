@@ -31,7 +31,8 @@ async def lifespan(_: FastAPI):
         f'{settings.observer_type}://{settings.observer_user}:{settings.observer_password}@{settings.observer_host}:{settings.observer_port}/{settings.observer_database}',
         echo=True,
     )
-    postgres.async_session = async_sessionmaker(postgres.engine, class_=AsyncSession, expire_on_commit=False)
+    postgres.async_session = async_sessionmaker(
+        postgres.engine, class_=AsyncSession, expire_on_commit=False)
 
     yield
     await postgres.engine.dispose()

@@ -1,24 +1,24 @@
-import json
-from async_fastapi_jwt_auth import AuthJWT
-from fastapi import Depends
-from schemas.auth import JWTUserData, LoginResponseSchema, UserLogin, AuthSettingsSchema
-from exceptions import incorrect_credentials, unauthorized, forbidden_error, server_error
-from core.hasher import DataHasher
-from sqlalchemy.ext.asyncio import AsyncSession
-from db.postgres import create_async_session
-from storages.user import UserStorage
-from storages.user_history import UserHistoryStorage
-from models.models import User
-from functools import lru_cache
 import http
+import json
 import time
 from typing import Optional
-from jose import jwt
-from fastapi import HTTPException, Request
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from async_fastapi_jwt_auth import AuthJWT
 from core.config import settings
+from core.hasher import DataHasher
+from db.postgres import create_async_session
 from db.redis import get_redis
+from exceptions import (forbidden_error, incorrect_credentials, server_error,
+                        unauthorized)
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import jwt
+from models.models import User
+from schemas.auth import (AuthSettingsSchema, JWTUserData, LoginResponseSchema,
+                          UserLogin)
+from sqlalchemy.ext.asyncio import AsyncSession
+from storages.user import UserStorage
+from storages.user_history import UserHistoryStorage
 
 
 @AuthJWT.load_config
@@ -75,7 +75,7 @@ class JWTBearer(HTTPBearer):
             raise HTTPException(status_code=http.HTTPStatus.FORBIDDEN, detail='Invalid authorization code.')
         if not credentials.scheme == 'Bearer':
             raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED, detail='Only Bearer token might be accepted')
-        
+
     async def check_fields(self, decoded_token: dict):
         subject: dict = decoded_token.get('sub')
         jti = decoded_token.get('jti')
@@ -102,7 +102,7 @@ class JwtHandler:
         if exists is False:
             raise forbidden_error
         return await jwt_user_data(subject=self.jwt_data.get('subject'))
-    
+
     async def get_current_user(self) -> User:
         return await jwt_user_data(subject=self.subject)
 
@@ -129,7 +129,7 @@ class AuthHandler:
     async def refresh_access_token(self, subject: dict) -> LoginResponseSchema:
         return LoginResponseSchema(
             access_token=await self.generate_access_token(subject=subject))
-    
+
     async def check_credentials(self, credentials: UserLogin) -> User:
         user, roles = await self.storage.with_roles(login=credentials.login)
         if not user:
@@ -147,8 +147,8 @@ class AuthHandler:
             'roles': roles
         })
 
-        access_token=await self.generate_access_token(subject=subject)
-        refresh_token=await self.generate_refresh_token(subject=subject)
+        access_token = await self.generate_access_token(subject=subject)
+        refresh_token = await self.generate_refresh_token(subject=subject)
 
         if self.observer:
             await self.observer.create(

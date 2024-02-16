@@ -2,25 +2,24 @@ import logging
 from contextlib import asynccontextmanager
 
 import uvicorn
-from api.v1 import role, user_history
 from api.v1 import auth as auth_api
+from api.v1 import role, user_history
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
+from authlib.integrations.starlette_client import OAuthError
 from core import config, logger
-
 from db import postgres, redis
+from exceptions import server_error
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse, ORJSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
-
+from fastapi.responses import JSONResponse, ORJSONResponse
+from oauth2 import oauth
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
-
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
-
 from starlette.middleware.sessions import SessionMiddleware
-
+from starlette.requests import Request as starler_request
 from utils.constraint import RequestLimit
 from utils.jaeger import configure_tracer
 from exceptions import server_error
@@ -33,9 +32,14 @@ from core import oauth2
 
 settings = config.APPSettings()
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    configure_tracer(host=settings.jaeger.host, port=settings.jaeger.port, service_name=settings.project_name)
+    if settings.jaeger.enable:
+        configure_tracer(
+            host=settings.jaeger.host,
+            port=settings.jaeger.port,
+            service_name=settings.project_name)
 
     redis.redis = Redis(host=settings.redis.host, port=settings.redis.port)
     postgres.async_engine = create_async_engine(
@@ -85,17 +89,28 @@ async def before_request(request: Request, call_next):
     response = await call_next(request)
     request_id = request.headers.get('X-Request-Id')
     if not request_id:
-        return ORJSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'detail': 'X-Request-Id is required'})
+        return ORJSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={
+                'detail': 'X-Request-Id is required'})
     return response
 
 
 @app.exception_handler(AuthJWTException)
 def authjwt_exception_handler(request: Request, exc: AuthJWTException):
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+    return JSONResponse(
+        status_code=exc.status_code, content={
+            "detail": exc.message})
 
-app.include_router(router=auth_api.router, prefix="/api/v1/auth", tags=["auth"])
+
+app.include_router(
+    router=auth_api.router,
+    prefix="/api/v1/auth",
+    tags=["auth"])
 app.include_router(router=role.router, prefix="/api/v1/role", tags=["role"])
-app.include_router(router=user_history.router, prefix="/api/v1/user_history", tags=["role"])
+app.include_router(
+    router=user_history.router,
+    prefix="/api/v1/user_history",
+    tags=["role"])
 app.add_middleware(SessionMiddleware, secret_key=settings.auth.secret_key)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 

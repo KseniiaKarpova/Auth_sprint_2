@@ -20,17 +20,20 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=20):
                     result = func(*args, **kwargs)
                     return result
                 except Exception as e:
-                    logger.info(f"Error: {str(e)}. Retrying in {current_sleep_time} seconds.")
-                    print(f"Error: {str(e)}. Retrying in {current_sleep_time} seconds.")
+                    logger.info(
+                        f"Error: {str(e)}. Retrying in {current_sleep_time} seconds.")
+                    print(
+                        f"Error: {str(e)}. Retrying in {current_sleep_time} seconds.")
                     time.sleep(current_sleep_time)
-                    current_sleep_time = min(current_sleep_time * factor, border_sleep_time)
+                    current_sleep_time = min(
+                        current_sleep_time * factor, border_sleep_time)
         return inner
     return func_wrapper
 
 
 def coroutine(func):
     """
-    this decorator allows to next 
+    this decorator allows to next
     coroutine in the generator functions
     """
     @wraps(func)
@@ -52,7 +55,7 @@ def session_scope():
         try:
             yield session
             session.commit()
-        except:
+        except BaseException:
             session.rollback()
             raise
 

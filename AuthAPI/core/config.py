@@ -47,6 +47,7 @@ class HasherSettings(BaseSettings):
 class JaegerSettings(BaseSettings):
     host: str = ...
     port: int = ...
+    enable: bool = ...
     model_config: str = SettingsConfigDict(env_prefix='jaeger_')
 
 
@@ -58,5 +59,6 @@ class APPSettings(BaseSettings):
     auth: AuthSettings = AuthSettings()
     hasher: HasherSettings = HasherSettings()
     jaeger: JaegerSettings = JaegerSettings()
+
 
 settings = APPSettings()

@@ -2,9 +2,8 @@ from logging import config as logging_config
 
 from core.logger import LOGGING
 from fastapi import Query
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
@@ -45,8 +44,9 @@ class Settings(BaseSettings):
     redis_host: str = Field('redis', env='REDIS_HOST')
     jaeger_host: str = Field('auth_jaeger', env='JAEGER_HOST')
     jaeger_port: int = Field(6831, env='JAEGER_PORT')
+    jaeger_enable: bool = Field(False, env='JAEGER_ENABLE')
     auth: AuthSettings = AuthSettings()
     file_api: FileAPISettings = FileAPISettings()
 
- 
+
 settings = Settings()

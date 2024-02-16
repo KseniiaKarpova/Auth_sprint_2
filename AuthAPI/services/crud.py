@@ -1,15 +1,16 @@
-from functools import lru_cache
-
-from exceptions import server_error
+from db.postgres import create_async_session
 from fastapi import Depends
 from services import AbstractCrudService
+from sqlalchemy.ext.asyncio import AsyncSession
 from storages.role import RoleStorage
 from storages.user_role import UserRoleStorage
-from db.postgres import create_async_session
-from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class CrudService(AbstractCrudService):
-    def __init__(self, storage_user_role: UserRoleStorage, storage_role: RoleStorage):
+    def __init__(
+            self,
+            storage_user_role: UserRoleStorage,
+            storage_role: RoleStorage):
         self.storage_user_role = storage_user_role
         self.storage_role = storage_role
 

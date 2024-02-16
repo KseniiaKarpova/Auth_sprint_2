@@ -1,9 +1,10 @@
-from db.redis import get_redis
 from datetime import datetime
+
+from db.redis import get_redis
 
 
 class RequestLimit:
-    DURATION = 60 # 1min
+    DURATION = 60  # 1min
     LIMIT = 100
 
     def __init__(self, duration: int = None, limit: int = None):

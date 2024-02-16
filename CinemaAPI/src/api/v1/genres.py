@@ -1,12 +1,10 @@
 from uuid import UUID
 
+from core.handlers import JwtHandler, require_access_token
+from exceptions import genre_not_found, genres_not_found
+from fastapi import APIRouter, Depends, Request
 from models.genre import Genre
 from services.genres import GenreService, get_genre_service
-
-from fastapi import APIRouter, Depends, Request
-from exceptions import genre_not_found, genres_not_found
-from core.handlers import require_access_token, JwtHandler
-
 
 router = APIRouter()
 

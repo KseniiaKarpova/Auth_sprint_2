@@ -19,7 +19,7 @@ class CustomBackend(BaseBackend):
             return None
         if response.status_code != http.HTTPStatus.OK:
             return None
-        
+
         data = response.json()
         try:
             user, created = User.objects.get_or_create(id=data['id'],)

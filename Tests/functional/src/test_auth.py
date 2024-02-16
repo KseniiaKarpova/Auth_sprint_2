@@ -22,7 +22,6 @@ import pytest
         ),
     ]
 )
-
 @pytest.mark.asyncio
 async def test_registration(make_post_request, in_data, out_data):
     body, status = await make_post_request(endpoint="/api/v1/auth/registration")
@@ -42,7 +41,6 @@ async def test_registration(make_post_request, in_data, out_data):
         ),
     ]
 )
-
 @pytest.mark.asyncio
 async def test_login(make_post_request, in_data, out_data):
     body, status = await make_post_request(endpoint="/api/v1/auth/login")

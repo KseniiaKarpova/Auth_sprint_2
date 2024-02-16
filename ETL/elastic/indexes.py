@@ -6,8 +6,8 @@ from elasticsearch.client import Elasticsearch
 
 class Index:
     __index_name__ = None
-    __settings__ : dict = None
-    __mappings__ : dict = None
+    __settings__: dict = None
+    __mappings__: dict = None
     __client__ = Elasticsearch([es_settings.url])
 
     @classmethod

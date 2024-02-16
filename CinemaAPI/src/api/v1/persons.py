@@ -1,13 +1,12 @@
 from uuid import UUID
 
 from core.config import QueryParams
+from core.handlers import JwtHandler, require_access_token
+from exceptions import films_not_found, person_not_found, persons_not_found
+from fastapi import APIRouter, Depends, Request
 from models.film import Film
 from models.person import Person, PersonDetails
 from services.person import PersonService, get_person_service
-from exceptions import person_not_found, films_not_found, persons_not_found
-from fastapi import APIRouter, Depends, Request
-from core.handlers import require_access_token, JwtHandler
-
 
 router = APIRouter()
 
