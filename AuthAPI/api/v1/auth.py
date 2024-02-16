@@ -1,15 +1,11 @@
-from fastapi import APIRouter, Depends, Header, Body, Request
-from redis.asyncio import Redis
-
+from core.handlers import (AuthHandler, JwtHandler, get_auth_handler,
+                           require_access_token, require_refresh_token)
 from db.redis import get_redis
-from schemas.auth import (
-    AuthSettingsSchema,
-    LoginResponseSchema,
-    UserCredentials,
-    UserUpdate,
-    UserLogin)
-from services.auth import get_auth_service, AuthService
-from core.handlers import get_auth_handler, JwtHandler, AuthHandler, require_access_token, require_refresh_token
+from fastapi import APIRouter, Body, Depends, Header
+from redis.asyncio import Redis
+from schemas.auth import (AuthSettingsSchema, LoginResponseSchema,
+                          UserCredentials, UserLogin, UserUpdate)
+from services.auth import AuthService, get_auth_service
 
 router = APIRouter()
 
@@ -29,7 +25,7 @@ async def refresh(
         jwt_handler: JwtHandler = Depends(require_refresh_token),
         auth: AuthHandler = Depends(get_auth_handler),
         ):
-    return await auth.generate_refresh_token(subject=jwt_handler.subject) 
+    return await auth.generate_refresh_token(subject=jwt_handler.subject)
 
 
 @router.post("/logout")

@@ -1,20 +1,25 @@
+import enum
 import uuid
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import ForeignKey, MetaData, String, Text, types
+from sqlalchemy import (JSON, Enum, ForeignKey, MetaData, String, Text,
+                        UniqueConstraint, types)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import (DeclarativeBase, Mapped, backref, mapped_column,
+                            relationship)
 
 metadata = MetaData()
 
 
 class Base(AsyncAttrs, DeclarativeBase):
     metadata = metadata
-    is_active: Mapped[bool] = mapped_column(default=True)  # instead deleting change this field
+    is_active: Mapped[bool] = mapped_column(
+        default=True)  # instead deleting change this field
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(onupdate=datetime.utcnow, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        onupdate=datetime.utcnow, nullable=True)
 
 
 class User(Base):
@@ -23,18 +28,19 @@ class User(Base):
     uuid: Mapped[UUID] = mapped_column(types.Uuid,
                                        default=uuid.uuid4,
                                        primary_key=True)
-    login: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
-    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    login: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=True)
     surname: Mapped[str] = mapped_column(String(255), nullable=True)
     is_superuser: Mapped[bool] = mapped_column(default=False)
     user_roles: Mapped[list['UserRole']] = relationship(back_populates='user',
-                                                 cascade='all, delete',
-                                                 passive_deletes=True)
-    user_history: Mapped[List['UserHistory']] = relationship(back_populates='user',
-                                                             cascade='all, delete',
-                                                             passive_deletes=True)
+                                                        cascade='all, delete',
+                                                        passive_deletes=True)
+    user_history: Mapped[List['UserHistory']] = relationship(
+        back_populates='user', cascade='all, delete', passive_deletes=True)
 
 
 class Role(Base):
@@ -45,8 +51,8 @@ class Role(Base):
                                        primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     user_roles: Mapped[list['UserRole']] = relationship(back_populates="role",
-                                                  cascade="all, delete",
-                                                  passive_deletes=True, )
+                                                        cascade="all, delete",
+                                                        passive_deletes=True, )
 
     @staticmethod
     def get_colums():
@@ -83,6 +89,48 @@ class UserHistory(Base):
     user_agent: Mapped[str] = mapped_column(String(255), nullable=True)
     refresh_token: Mapped[str] = mapped_column(Text(), nullable=True)
     user: Mapped['User'] = relationship(back_populates='user_history')
+
+
+class SocialNetworksEnum(enum.Enum):
+    Yandex = 'yandex'
+    Google = 'google'
+    VK = 'vk'
+
+
+class SocialAccount(Base):
+    __tablename__ = 'user_social_services'
+
+    uuid: Mapped[UUID] = mapped_column(types.Uuid,
+                                       default=uuid.uuid4,
+                                       primary_key=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey('users.uuid'),
+                                          onupdate='CASCADE',
+                                          nullable=False)
+    user = relationship(
+        User,
+        backref=backref(
+            'user_social_services',
+            cascade='all,delete',
+            lazy=True),
+    )
+
+    social_user_id: Mapped[str] = mapped_column(Text)
+    type: Mapped[str] = mapped_column(
+        Enum(SocialNetworksEnum), nullable=False)
+    data: Mapped[JSON] = mapped_column(JSON, nullable=True)
+
+    __table_args__ = (UniqueConstraint('social_user_id', 'type'),)
+
+    def __init__(
+            self,
+            user_id: UUID,
+            social_user_id: str,
+            type: SocialNetworksEnum,
+            data: str | None = None) -> None:
+        self.user_id = user_id
+        self.social_user_id = social_user_id
+        self.type = type
+        self.data = data
 
 
 """

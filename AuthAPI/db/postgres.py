@@ -1,8 +1,8 @@
-from fastapi import Depends
 from exceptions import integrity_error, server_error
+from fastapi import Depends
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import IntegrityError
 
 async_session_factory: sessionmaker | None = None
 async_engine: AsyncEngine | None = None
@@ -26,9 +26,9 @@ async def commit_async_session(session: AsyncSession):
         error = None
         try:
             await session.commit()
-        except IntegrityError as err:
+        except IntegrityError:
             error = integrity_error
-        except Exception as err:
+        except Exception:
             error = server_error
         if error:
             await session.rollback()

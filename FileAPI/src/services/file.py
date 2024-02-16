@@ -21,7 +21,7 @@ class FileService(AbstractService):
 
     async def download(self, short_name):
         data = await self.stopage.get(bucket=bucket_settings.bucket_movies,
-                                           short_name=short_name,)
+                                      short_name=short_name,)
         return data
 
 

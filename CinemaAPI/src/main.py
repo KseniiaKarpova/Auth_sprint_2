@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 import uvicorn
 from api.v1 import films, genres, persons
 from core import config
-from utils.jaeger import configure_tracer
 from core.logger import LOGGING
 from db import elastic, redis
 from elasticsearch import AsyncElasticsearch
@@ -12,17 +11,22 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import ORJSONResponse
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
-from utils.constraint import RequestLimit
+from utils.jaeger import configure_tracer
 
 settings = config.Settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    configure_tracer(host=settings.jaeger_host, port=settings.jaeger_port, service_name=settings.project_name)
+    if settings.jaeger_enable:
+        configure_tracer(
+            host=settings.jaeger_host,
+            port=settings.jaeger_port,
+            service_name=settings.project_name)
 
     redis.redis = Redis(host=settings.redis_host, port=settings.redis_port)
-    elastic.es = AsyncElasticsearch(hosts=[f'http://{settings.es_host}:{settings.es_port}'])
+    elastic.es = AsyncElasticsearch(
+        hosts=[f'http://{settings.es_host}:{settings.es_port}'])
     yield
     await redis.redis.close()
     await elastic.es.close()
@@ -40,18 +44,20 @@ app = FastAPI(
 
 @app.middleware('http')
 async def before_request(request: Request, call_next):
-    user = request.headers.get('X-Forwarded-For')
-    result = await RequestLimit().is_over_limit(user=user)
-    if result:
-        return ORJSONResponse(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            content={'detail': 'Too many requests'}
-        )
+    # user = request.headers.get('X-Forwarded-For')
+    # result = await RequestLimit().is_over_limit(user=user)
+    # if result:
+    #    return ORJSONResponse(
+    #        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+    #        content={'detail': 'Too many requests'}
+    #    )
 
     response = await call_next(request)
     request_id = request.headers.get('X-Request-Id')
     if not request_id:
-        return ORJSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'detail': 'X-Request-Id is required'})
+        return ORJSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={
+                'detail': 'X-Request-Id is required'})
     return response
 
 

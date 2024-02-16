@@ -1,6 +1,6 @@
-from models.models import User, UserRole, Role
+from models.models import Role, User, UserRole
+from sqlalchemy import func, select
 from storages import AlchemyBaseStorage
-from sqlalchemy import select, func
 
 
 class UserStorage(AlchemyBaseStorage):

@@ -1,3 +1,6 @@
+import random
+import string
+
 import pytest
 from core.config import bucket_settings
 from db.minio import MinioStorage
@@ -5,16 +8,13 @@ from db.postgres import PostgresStorage
 from db.proxy_storage import ProxyStorage
 from fastapi import UploadFile
 from services.file import FileService
-import random
-import string
-
 
 pytest_plugins = ('pytest_asyncio',)
 
 
 def randomword(length):
-   letters = string.ascii_lowercase
-   return ''.join(random.choice(letters) for i in range(length))
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
 
 
 @pytest.mark.asyncio

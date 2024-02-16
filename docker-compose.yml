@@ -37,6 +37,8 @@ services:
       ES_PORT: ${ES_PORT}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+    expose:
+      - 8002
     build:
       context: CinemaAPI
       dockerfile: Dockerfile
