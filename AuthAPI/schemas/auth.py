@@ -74,7 +74,7 @@ class UserUpdate(BaseModel):
 
 
 class SocialData(BaseModel):
-    user: JWTUserData
+    user: UserAuthData
     social_user_id: str
     type: str
     data: dict
