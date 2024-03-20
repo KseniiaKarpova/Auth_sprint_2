@@ -15,7 +15,7 @@ class ProxyStorage(AbstractStorage):
             'file_type': file.content_type,
             'size': file.size,
         }
-        await self.path_storage.save(data, path+file.filename)
+        await self.path_storage.save(data, path + f"{short_name}/" + file.filename)
         await self.object_storage.save(file, bucket, path)
         return data
 

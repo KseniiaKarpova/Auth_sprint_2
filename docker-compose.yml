@@ -18,7 +18,7 @@ services:
       - .env
     volumes:
       - ./DjangoAdmin:/app
-      - static_volume:/app/static
+      - static_volume:/app/staticfiles
       - media_volume:/app/media
     depends_on:
       cinema_postgres:
@@ -170,7 +170,7 @@ services:
       - MINIO_ROOT_USER=${S3_USER}
       - MINIO_ROOT_PASSWORD=${S3_PASSWORD}
     volumes:
-      - minio_data:/data
+      - ./data:/data
     command: server --console-address ":9001" /data
 
   elasticsearch:
